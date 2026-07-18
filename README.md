@@ -52,8 +52,8 @@ Runs at `http://localhost:3000`
 | Phase | Focus | Status |
 |-------|--------|--------|
 | 0 | Setup, logo, brand, scaffolding | Done |
-| 1 | Auth + course APIs + seed | Next |
-| 2 | Landing (7+ sections) | Pending |
+| 1 | Auth + course APIs + seed | Pending |
+| 2 | Landing (7+ sections) + shell | Done |
 | 3 | Explore, details, auth UI, add/manage | Pending |
 | 4 | Dashboard + Recharts | Pending |
 | 5 | AI Course Writer | Pending |
