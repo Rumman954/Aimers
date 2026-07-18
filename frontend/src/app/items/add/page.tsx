@@ -6,6 +6,12 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
+import { CATEGORIES, LEVELS } from "@/lib/courses";
+import type { CourseLevel } from "@/types/course";
+import { cn } from "@/lib/utils";
+
+const fieldClassName =
+  "mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm";
 
 export default function AddItemPage() {
   return (
@@ -15,39 +21,73 @@ export default function AddItemPage() {
   );
 }
 
+type FieldErrors = Partial<
+  Record<
+    | "title"
+    | "shortDescription"
+    | "fullDescription"
+    | "price"
+    | "category"
+    | "duration"
+    | "thumbnail",
+    string
+  >
+>;
+
 function AddItemForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [price, setPrice] = useState("49");
-  const [category, setCategory] = useState("Programming");
-  const [level, setLevel] = useState<"Beginner" | "Intermediate" | "Advanced">(
-    "Beginner"
-  );
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [level, setLevel] = useState<CourseLevel>("Beginner");
   const [duration, setDuration] = useState("6 weeks");
   const [thumbnail, setThumbnail] = useState(
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"
   );
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function validate(): FieldErrors {
+    const next: FieldErrors = {};
+    if (!title.trim()) next.title = "Title is required.";
+    if (!shortDescription.trim()) {
+      next.shortDescription = "Short description is required.";
+    }
+    if (!fullDescription.trim()) {
+      next.fullDescription = "Full description is required.";
+    }
+    if (!price.trim() || Number.isNaN(Number(price)) || Number(price) < 0) {
+      next.price = "Enter a valid price.";
+    }
+    if (!category) next.category = "Choose a category.";
+    if (!duration.trim()) next.duration = "Duration is required.";
+    if (!thumbnail.trim()) next.thumbnail = "Image URL is required.";
+    return next;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    const nextErrors = validate();
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setLoading(true);
     try {
       await api("/courses", {
         method: "POST",
         body: {
-          title,
-          shortDescription,
-          fullDescription,
+          title: title.trim(),
+          shortDescription: shortDescription.trim(),
+          fullDescription: fullDescription.trim(),
           price: Number(price),
           category,
           level,
-          duration,
-          thumbnail,
+          duration: duration.trim(),
+          thumbnail: thumbnail.trim(),
         },
       });
       router.push("/items/manage");
@@ -71,63 +111,172 @@ function AddItemForm() {
       />
       <form
         onSubmit={handleSubmit}
-        className="mt-8 space-y-4 rounded-[var(--aimers-radius)] border border-aimers-border p-6"
+        noValidate
+        className="mt-8 space-y-5 rounded-[var(--aimers-radius)] border border-aimers-border p-6"
       >
         {error ? (
           <p className="rounded-[var(--aimers-radius)] bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
           </p>
         ) : null}
-        {(
-          [
-            ["Title", title, setTitle, "text"],
-            ["Short description", shortDescription, setShortDescription, "text"],
-            ["Full description", fullDescription, setFullDescription, "textarea"],
-            ["Price", price, setPrice, "number"],
-            ["Category", category, setCategory, "text"],
-            ["Duration", duration, setDuration, "text"],
-            ["Image URL", thumbnail, setThumbnail, "url"],
-          ] as const
-        ).map(([label, value, setter, type]) => (
-          <div key={label}>
-            <label className="block text-sm font-medium">{label}</label>
-            {type === "textarea" ? (
-              <textarea
-                required
-                value={value}
-                onChange={(e) => setter(e.target.value)}
-                rows={4}
-                className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm"
-              />
-            ) : (
-              <input
-                required
-                type={type}
-                value={value}
-                onChange={(e) => setter(e.target.value)}
-                className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm"
-              />
-            )}
-          </div>
-        ))}
+
+        <Field
+          id="course-title"
+          label="Course title"
+          value={title}
+          onChange={setTitle}
+          error={fieldErrors.title}
+          required
+        />
+        <Field
+          id="course-short-description"
+          label="Short description"
+          value={shortDescription}
+          onChange={setShortDescription}
+          error={fieldErrors.shortDescription}
+          required
+        />
+        <Field
+          id="course-full-description"
+          label="Full description"
+          value={fullDescription}
+          onChange={setFullDescription}
+          error={fieldErrors.fullDescription}
+          required
+          multiline
+        />
+        <Field
+          id="course-price"
+          label="Price (USD)"
+          type="number"
+          min="0"
+          step="0.01"
+          value={price}
+          onChange={setPrice}
+          error={fieldErrors.price}
+          required
+        />
+
         <div>
-          <label className="block text-sm font-medium">Level</label>
+          <label htmlFor="course-category" className="block text-sm font-medium">
+            Category
+          </label>
           <select
-            value={level}
-            onChange={(e) =>
-              setLevel(e.target.value as "Beginner" | "Intermediate" | "Advanced")
-            }
-            className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm"
+            id="course-category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={fieldClassName}
           >
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
+            {CATEGORIES.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          {fieldErrors.category ? (
+            <p className="mt-1 text-xs text-red-600">{fieldErrors.category}</p>
+          ) : null}
+        </div>
+
+        <div>
+          <label htmlFor="course-level" className="block text-sm font-medium">
+            Difficulty level
+          </label>
+          <select
+            id="course-level"
+            value={level}
+            onChange={(e) => setLevel(e.target.value as CourseLevel)}
+            className={fieldClassName}
+          >
+            {LEVELS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
         </div>
+
+        <Field
+          id="course-duration"
+          label="Duration"
+          value={duration}
+          onChange={setDuration}
+          error={fieldErrors.duration}
+          placeholder="e.g. 6 weeks"
+          required
+        />
+        <Field
+          id="course-thumbnail"
+          label="Thumbnail image URL"
+          type="url"
+          value={thumbnail}
+          onChange={setThumbnail}
+          error={fieldErrors.thumbnail}
+          required
+        />
+
         <Button type="submit" size="lg" disabled={loading}>
-          {loading ? "Saving..." : "Submit"}
+          {loading ? "Saving…" : "Publish course"}
         </Button>
       </form>
     </main>
+  );
+}
+
+function Field({
+  id,
+  label,
+  value,
+  onChange,
+  error,
+  required,
+  multiline,
+  type = "text",
+  placeholder,
+  min,
+  step,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  required?: boolean;
+  multiline?: boolean;
+  type?: string;
+  placeholder?: string;
+  min?: string;
+  step?: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium">
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={id}
+          required={required}
+          rows={4}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(fieldClassName, error && "border-red-400")}
+        />
+      ) : (
+        <input
+          id={id}
+          required={required}
+          type={type}
+          min={min}
+          step={step}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(fieldClassName, error && "border-red-400")}
+        />
+      )}
+      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+    </div>
   );
 }

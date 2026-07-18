@@ -57,12 +57,15 @@ function ManageItemsContent() {
         </p>
       ) : null}
 
-      <div className="mt-8 overflow-x-auto rounded-[var(--aimers-radius)] border border-aimers-border">
-        <table className="min-w-full text-left text-sm">
+      <div className="mt-8 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="min-w-[640px] rounded-[var(--aimers-radius)] border border-aimers-border sm:min-w-0">
+        <table className="w-full min-w-[640px] text-left text-sm sm:min-w-0">
           <thead className="bg-aimers-surface text-aimers-muted">
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
-              <th className="px-4 py-3 font-medium">Category</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">
+                Category
+              </th>
               <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
@@ -71,10 +74,15 @@ function ManageItemsContent() {
             {(data || []).map((course) => (
               <tr key={course.id} className="border-t border-aimers-border">
                 <td className="px-4 py-3 font-medium text-aimers-black">
-                  {course.title}
+                  <span className="block">{course.title}</span>
+                  <span className="mt-0.5 block text-xs text-aimers-muted sm:hidden">
+                    {course.category}
+                  </span>
                 </td>
-                <td className="px-4 py-3 text-aimers-muted">{course.category}</td>
-                <td className="px-4 py-3">${course.price}</td>
+                <td className="hidden px-4 py-3 text-aimers-muted sm:table-cell">
+                  {course.category}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">${course.price}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-3">
                     <Link
@@ -106,6 +114,7 @@ function ManageItemsContent() {
             ) : null}
           </tbody>
         </table>
+        </div>
       </div>
     </main>
   );

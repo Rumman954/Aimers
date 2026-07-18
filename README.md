@@ -89,7 +89,7 @@ Without the Client ID, email/password + Demo login still work; Google shows a se
 | 0 | Setup, logo, brand, scaffolding | Done |
 | 1 | Auth + course APIs + seed | Done |
 | 2 | Landing (7+ sections) + shell | Done |
-| 3 | Explore, details, auth UI, add/manage | Pending |
+| 3 | Explore, details, auth UI, add/manage | Done |
 | 4 | Dashboard + Recharts | Pending |
 | 5 | AI Course Writer | Pending |
 | 6 | AI Pathfinder recommendations | Pending |

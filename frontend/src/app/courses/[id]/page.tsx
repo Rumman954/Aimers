@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Clock, Star, Users } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
 import { CourseImage } from "@/components/courses/course-image";
+import { CourseReviews } from "@/components/courses/course-reviews";
+import { EnrollButton } from "@/components/courses/enroll-button";
 import { Button } from "@/components/ui/button";
 import {
   getCourseById,
@@ -128,8 +130,8 @@ export default async function CourseDetailPage({
             <p className="mt-6 font-[family-name:var(--font-space-grotesk)] text-3xl font-bold text-aimers-black">
               ${course.price}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button size="lg">Enroll now</Button>
+            <div className="mt-6 flex flex-wrap items-start gap-3">
+              <EnrollButton />
               <Button href="/courses" variant="secondary" size="lg">
                 Back to courses
               </Button>
@@ -176,6 +178,8 @@ export default async function CourseDetailPage({
             ))}
           </dl>
         </section>
+
+        <CourseReviews courseId={id} />
 
         {related.length > 0 ? (
           <section className="mt-16">
