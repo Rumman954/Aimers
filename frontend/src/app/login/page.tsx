@@ -2,27 +2,89 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
+import { ApiError } from "@/lib/api";
+
+const DEMO_EMAIL = "demo@aimers.com";
+const DEMO_PASSWORD = "Demo@1234";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  function validate() {
+    const next: { email?: string; password?: string } = {};
+    if (!email.trim()) next.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      next.email = "Enter a valid email address";
+    }
+    if (!password) next.password = "Password is required";
+    else if (password.length < 6) next.password = "Password must be at least 6 characters";
+    setFieldErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    login(email, password);
-    router.push("/");
+    setError("");
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Unable to sign in");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleDemoLogin() {
-    setEmail("demo@aimers.learn");
-    setPassword("demo1234");
+  async function handleDemoLogin() {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    setFieldErrors({});
+    setError("");
+    setLoading(true);
+    try {
+      await login(DEMO_EMAIL, DEMO_PASSWORD);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Demo login failed. Is the backend running and seeded?"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
+
+  const handleGoogle = useCallback(
+    async (credential: string) => {
+      setError("");
+      await loginWithGoogle(credential);
+      router.push("/dashboard");
+    },
+    [loginWithGoogle, router]
+  );
 
   return (
     <main className="mx-auto flex max-w-md flex-1 flex-col justify-center px-4 py-16 md:px-6">
@@ -35,7 +97,14 @@ export default function LoginPage() {
       <form
         onSubmit={handleSubmit}
         className="space-y-5 rounded-[var(--aimers-radius)] border border-aimers-border p-6 md:p-8"
+        noValidate
       >
+        {error ? (
+          <p className="rounded-[var(--aimers-radius)] bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        ) : null}
+
         <div>
           <label
             htmlFor="email"
@@ -46,11 +115,14 @@ export default function LoginPage() {
           <input
             id="email"
             type="email"
-            required
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
           />
+          {fieldErrors.email ? (
+            <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+          ) : null}
         </div>
         <div>
           <label
@@ -62,14 +134,17 @@ export default function LoginPage() {
           <input
             id="password"
             type="password"
-            required
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
           />
+          {fieldErrors.password ? (
+            <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
+          ) : null}
         </div>
-        <Button type="submit" size="lg" className="w-full">
-          Sign in
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
         </Button>
         <Button
           type="button"
@@ -77,9 +152,24 @@ export default function LoginPage() {
           size="lg"
           className="w-full"
           onClick={handleDemoLogin}
+          disabled={loading}
         >
           Demo login
         </Button>
+
+        <div className="relative py-1 text-center text-xs text-aimers-muted">
+          <span className="bg-aimers-white px-2 relative z-10">or</span>
+          <span className="absolute inset-x-0 top-1/2 h-px bg-aimers-border" />
+        </div>
+
+        <GoogleSignInButton
+          onCredential={handleGoogle}
+          onError={(message) => setError(message)}
+        />
+
+        <p className="text-center text-xs text-aimers-muted">
+          Demo: {DEMO_EMAIL} / {DEMO_PASSWORD}
+        </p>
       </form>
 
       <p className="mt-6 text-center text-sm text-aimers-muted">

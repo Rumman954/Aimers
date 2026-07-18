@@ -13,7 +13,7 @@ export const courses: Course[] = [
     level: "Intermediate",
     duration: "12 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
+      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
     rating: 4.8,
     reviewCount: 342,
     instructorName: "Sarah Chen",
@@ -31,7 +31,7 @@ export const courses: Course[] = [
     level: "Beginner",
     duration: "10 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
     rating: 4.7,
     reviewCount: 518,
     instructorName: "Dr. Marcus Okonkwo",
@@ -49,7 +49,7 @@ export const courses: Course[] = [
     level: "Beginner",
     duration: "8 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
+      "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=800&q=80",
     rating: 4.9,
     reviewCount: 276,
     instructorName: "Elena Vasquez",
@@ -67,7 +67,7 @@ export const courses: Course[] = [
     level: "Intermediate",
     duration: "6 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
     rating: 4.6,
     reviewCount: 189,
     instructorName: "James Whitfield",
@@ -85,7 +85,7 @@ export const courses: Course[] = [
     level: "Intermediate",
     duration: "8 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
     rating: 4.8,
     reviewCount: 421,
     instructorName: "Priya Sharma",
@@ -103,7 +103,7 @@ export const courses: Course[] = [
     level: "Advanced",
     duration: "14 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
     rating: 4.7,
     reviewCount: 156,
     instructorName: "Alex Rivera",
@@ -121,7 +121,7 @@ export const courses: Course[] = [
     level: "Beginner",
     duration: "5 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
     rating: 4.5,
     reviewCount: 98,
     instructorName: "Nadia Al-Rashid",
@@ -139,7 +139,7 @@ export const courses: Course[] = [
     level: "Advanced",
     duration: "11 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80",
     rating: 4.8,
     reviewCount: 203,
     instructorName: "Dr. Marcus Okonkwo",
@@ -157,7 +157,7 @@ export const courses: Course[] = [
     level: "Beginner",
     duration: "7 weeks",
     thumbnail:
-      "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+      "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=800&q=80",
     rating: 4.6,
     reviewCount: 167,
     instructorName: "Elena Vasquez",

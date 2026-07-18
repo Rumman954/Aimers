@@ -1,8 +1,10 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Course } from "@/types/course";
+import { CourseImage } from "@/components/courses/course-image";
 
 type CourseCardProps = {
   course: Course;
@@ -18,11 +20,9 @@ export function CourseCard({ course, className }: CourseCardProps) {
       )}
     >
       <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-aimers-surface">
-        <Image
+        <CourseImage
           src={course.thumbnail}
           alt={course.title}
-          fill
-          className="object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
       </div>

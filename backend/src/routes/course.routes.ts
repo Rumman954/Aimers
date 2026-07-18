@@ -1,20 +1,33 @@
 import { Router } from "express";
+import {
+  listCourses,
+  getCourse,
+  getRelatedCourses,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  listMyCourses,
+  listReviews,
+  createReview,
+} from "../controllers/course.controller.js";
+import { protect, restrictTo } from "../middleware/auth.js";
 
 const router = Router();
 
-// Phase 1: list, get, create, update, delete
-router.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    message: "Course routes ready — implement in Phase 1",
-    endpoints: [
-      "GET /api/courses",
-      "GET /api/courses/:id",
-      "POST /api/courses",
-      "PATCH /api/courses/:id",
-      "DELETE /api/courses/:id",
-    ],
-  });
-});
+router.get("/", listCourses);
+router.get("/mine/list", protect, listMyCourses);
+router.get("/:id", getCourse);
+router.get("/:id/related", getRelatedCourses);
+router.get("/:id/reviews", listReviews);
+
+router.post(
+  "/",
+  protect,
+  restrictTo("instructor", "admin"),
+  createCourse
+);
+router.patch("/:id", protect, updateCourse);
+router.delete("/:id", protect, deleteCourse);
+router.post("/:id/reviews", protect, createReview);
 
 export default router;

@@ -1,19 +1,19 @@
 import { Router } from "express";
+import {
+  register,
+  login,
+  googleAuth,
+  me,
+  demoCredentials,
+} from "../controllers/auth.controller.js";
+import { protect } from "../middleware/auth.js";
 
 const router = Router();
 
-// Phase 1: register, login, google, me
-router.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    message: "Auth routes ready — implement in Phase 1",
-    endpoints: [
-      "POST /api/auth/register",
-      "POST /api/auth/login",
-      "POST /api/auth/google",
-      "GET /api/auth/me",
-    ],
-  });
-});
+router.post("/register", register);
+router.post("/login", login);
+router.post("/google", googleAuth);
+router.get("/me", protect, me);
+router.get("/demo", demoCredentials);
 
 export default router;
