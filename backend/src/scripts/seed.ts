@@ -420,9 +420,58 @@ async function seed() {
     })
   );
 
+  // Demo student enrollments + interactions for dashboard charts
+  const demoCourseSlice = courses.slice(0, 6);
+  for (let i = 0; i < demoCourseSlice.length; i++) {
+    const course = demoCourseSlice[i];
+    const createdAt = new Date();
+    createdAt.setMonth(createdAt.getMonth() - (5 - i));
+
+    await Enrollment.create({
+      user: demoStudent._id,
+      course: course._id,
+      progress: [15, 35, 55, 70, 90, 100][i],
+      createdAt,
+      updatedAt: createdAt,
+    });
+
+    await Interaction.create({
+      user: demoStudent._id,
+      course: course._id,
+      type: "enroll",
+      createdAt,
+    });
+  }
+
+  // Extra learners so instructor charts have monthly enrollment volume
+  for (let s = 0; s < 5; s++) {
+    const learner = await User.create({
+      name: `Learner ${s + 1}`,
+      email: `learner${s + 1}@aimers.com`,
+      passwordHash,
+      role: "student",
+    });
+
+    for (let m = 0; m < 4; m++) {
+      const course = courses[(s + m) % courses.length];
+      const createdAt = new Date();
+      createdAt.setMonth(createdAt.getMonth() - m);
+      createdAt.setDate(5 + s);
+
+      await Enrollment.create({
+        user: learner._id,
+        course: course._id,
+        progress: 10 + m * 20,
+        createdAt,
+        updatedAt: createdAt,
+      }).catch(() => undefined);
+    }
+  }
+
   console.log("Seed complete");
-  console.log(`Users: 2 (demo student + instructor)`);
+  console.log(`Users: demo student + instructor + 5 learners`);
   console.log(`Courses: ${courses.length}`);
+  console.log(`Demo enrollments seeded for dashboard charts`);
   console.log(`Demo login: ${env.DEMO_EMAIL} / ${env.DEMO_PASSWORD}`);
   console.log(`Instructor: instructor@aimers.com / Instructor@1234`);
   console.log(`Demo student id: ${demoStudent._id}`);

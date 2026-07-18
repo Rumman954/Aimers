@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { api, ApiError } from "@/lib/api";
 
-export function EnrollButton() {
+type EnrollButtonProps = {
+  courseId: string;
+};
+
+export function EnrollButton({ courseId }: EnrollButtonProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const [enrolled, setEnrolled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   if (isLoading) {
     return (
@@ -31,19 +38,39 @@ export function EnrollButton() {
           Enrolled
         </Button>
         <p className="text-sm font-medium text-aimers-gold">
-          Enrolled (demo)
+          {message || "You're enrolled in this course."}
         </p>
       </div>
     );
   }
 
+  async function handleEnroll() {
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await api<{ success: boolean; message?: string }>(
+        `/dashboard/enroll/${courseId}`,
+        { method: "POST" }
+      );
+      setEnrolled(true);
+      setMessage(res.message || "Enrollment saved to your dashboard.");
+    } catch (err) {
+      setMessage(
+        err instanceof ApiError ? err.message : "Could not enroll right now."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <Button
-      size="lg"
-      type="button"
-      onClick={() => setEnrolled(true)}
-    >
-      Enroll now
-    </Button>
+    <div className="flex flex-col gap-2">
+      <Button size="lg" type="button" onClick={handleEnroll} disabled={loading}>
+        {loading ? "Enrolling…" : "Enroll now"}
+      </Button>
+      {message && !enrolled ? (
+        <p className="text-sm text-red-600">{message}</p>
+      ) : null}
+    </div>
   );
 }

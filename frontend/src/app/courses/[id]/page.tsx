@@ -131,7 +131,7 @@ export default async function CourseDetailPage({
               ${course.price}
             </p>
             <div className="mt-6 flex flex-wrap items-start gap-3">
-              <EnrollButton />
+              <EnrollButton courseId={id} />
               <Button href="/courses" variant="secondary" size="lg">
                 Back to courses
               </Button>
