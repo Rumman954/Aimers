@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PasswordInput } from "@/components/auth/password-input";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -112,21 +113,13 @@ export default function RegisterPage() {
             <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
           ) : null}
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
-          />
-          {fieldErrors.password ? (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
-          ) : null}
-        </div>
+        <PasswordInput
+          id="password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="new-password"
+          error={fieldErrors.password}
+        />
         <div>
           <label htmlFor="role" className="block text-sm font-medium">
             I want to join as
