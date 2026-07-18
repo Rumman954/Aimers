@@ -17,11 +17,11 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Aimers | IIT-JEE · NEET · Foundation",
+    default: "Aimers — Aim higher. Learn smarter.",
     template: "%s | Aimers",
   },
   description:
-    "Aimers — online education for IIT-JEE, NEET, and Foundation. Aim higher. Learn smarter.",
+    "Aimers — online education platform with courses, instructor tools, and AI learning support.",
   icons: {
     icon: "/favicon.png",
   },

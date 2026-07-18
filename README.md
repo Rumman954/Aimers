@@ -1,6 +1,6 @@
 # Aimers
 
-Online education platform for **IIT-JEE | NEET | Foundation** — courses, instructor tools, and agentic AI (Course Writer + Pathfinder).
+Online education platform — courses, instructor tools, and agentic AI (Course Writer + Pathfinder).
 
 ## Structure
 
@@ -13,9 +13,10 @@ Aimers/
 
 ## Brand
 
-- Logo: `@` mark + **AIMERS** + tagline
+- Logo: `@` mark + **AIMERS**
 - Colors: black `#0A0A0A`, white `#FFFFFF`, gold `#D4A017`
 - Fonts: Outfit (UI) · Space Grotesk (display)
+- Hero background: `frontend/public/aimers-hero-bg.jpg`
 
 ## Quick start
 

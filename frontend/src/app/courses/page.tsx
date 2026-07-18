@@ -6,7 +6,7 @@ export default function CoursesPage() {
       </h1>
       <p className="mt-3 text-aimers-muted">
         Explore page ships in Phase 3 — search, filters, sorting, and pagination
-        for Aimers courses (IIT-JEE, NEET, Foundation).
+        for Aimers courses.
       </p>
     </main>
   );

@@ -7,7 +7,6 @@ router.get("/", (_req, res) => {
     success: true,
     message: "Aimers API is healthy",
     brand: "Aimers",
-    tagline: "IIT-JEE | NEET | FOUNDATION",
   });
 });
 

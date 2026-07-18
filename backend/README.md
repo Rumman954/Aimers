@@ -1,6 +1,6 @@
 # Aimers Backend
 
-Express + TypeScript API for the Aimers education platform (IIT-JEE | NEET | Foundation).
+Express + TypeScript API for the Aimers education platform.
 
 ## Setup
 
