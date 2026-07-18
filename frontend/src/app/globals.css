@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  /* Aimers brand — max 3 primaries + neutrals */
+  --aimers-black: #0a0a0a;
+  --aimers-white: #ffffff;
+  --aimers-gold: #d4a017;
+  --aimers-muted: #6b7280;
+  --aimers-surface: #f4f4f5;
+  --aimers-border: #e4e4e7;
+  --aimers-radius: 0.75rem;
+
+  --background: var(--aimers-white);
+  --foreground: var(--aimers-black);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-aimers-black: var(--aimers-black);
+  --color-aimers-white: var(--aimers-white);
+  --color-aimers-gold: var(--aimers-gold);
+  --color-aimers-muted: var(--aimers-muted);
+  --color-aimers-surface: var(--aimers-surface);
+  --color-aimers-border: var(--aimers-border);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-space-grotesk);
+  --radius-aimers: var(--aimers-radius);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
