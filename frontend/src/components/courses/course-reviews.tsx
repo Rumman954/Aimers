@@ -47,24 +47,71 @@ function StarRating({
   value,
   max = 5,
   className,
+  interactive = false,
+  onChange,
+  size = "sm",
 }: {
   value: number;
   max?: number;
   className?: string;
+  interactive?: boolean;
+  onChange?: (value: number) => void;
+  size?: "sm" | "md";
 }) {
+  const [hovered, setHovered] = useState(0);
+  const display = interactive && hovered > 0 ? hovered : value;
+  const iconSize = size === "md" ? "h-7 w-7" : "h-4 w-4";
+
   return (
-    <div className={cn("flex items-center gap-0.5", className)} aria-hidden>
-      {Array.from({ length: max }).map((_, index) => (
-        <Star
-          key={index}
-          className={cn(
-            "h-4 w-4",
-            index < value
-              ? "fill-aimers-gold text-aimers-gold"
-              : "text-aimers-border"
-          )}
-        />
-      ))}
+    <div
+      className={cn("flex items-center gap-0.5", className)}
+      role={interactive ? "radiogroup" : undefined}
+      aria-label={interactive ? "Rating" : undefined}
+      aria-hidden={interactive ? undefined : true}
+      onMouseLeave={interactive ? () => setHovered(0) : undefined}
+    >
+      {Array.from({ length: max }).map((_, index) => {
+        const starValue = index + 1;
+        const filled = starValue <= display;
+
+        if (!interactive) {
+          return (
+            <Star
+              key={starValue}
+              className={cn(
+                iconSize,
+                filled
+                  ? "fill-aimers-gold text-aimers-gold"
+                  : "text-aimers-border"
+              )}
+            />
+          );
+        }
+
+        return (
+          <button
+            key={starValue}
+            type="button"
+            role="radio"
+            aria-checked={value === starValue}
+            aria-label={`${starValue} star${starValue === 1 ? "" : "s"}`}
+            onMouseEnter={() => setHovered(starValue)}
+            onFocus={() => setHovered(starValue)}
+            onBlur={() => setHovered(0)}
+            onClick={() => onChange?.(starValue)}
+            className="rounded-sm p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aimers-gold focus-visible:ring-offset-2"
+          >
+            <Star
+              className={cn(
+                iconSize,
+                filled
+                  ? "fill-aimers-gold text-aimers-gold"
+                  : "text-aimers-border"
+              )}
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -173,21 +220,24 @@ export function CourseReviews({ courseId }: CourseReviewsProps) {
               </p>
             ) : null}
             <div>
-              <label htmlFor="review-rating" className="block text-sm font-medium">
+              <p id="review-rating-label" className="block text-sm font-medium">
                 Rating
-              </label>
-              <select
-                id="review-rating"
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-                className={cn(fieldClassName, "mt-1.5 max-w-xs")}
+              </p>
+              <div
+                className="mt-2 flex items-center gap-3"
+                aria-labelledby="review-rating-label"
               >
-                {[5, 4, 3, 2, 1].map((value) => (
-                  <option key={value} value={value}>
-                    {value} star{value === 1 ? "" : "s"}
-                  </option>
-                ))}
-              </select>
+                <StarRating
+                  value={rating}
+                  interactive
+                  size="md"
+                  onChange={setRating}
+                  className="gap-1"
+                />
+                <span className="text-sm text-aimers-muted">
+                  {rating} / 5
+                </span>
+              </div>
             </div>
             <div>
               <label htmlFor="review-comment" className="block text-sm font-medium">

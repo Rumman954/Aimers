@@ -99,6 +99,13 @@ OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=...
 ```
 
+## AI Pathfinder (Phase 6)
+
+1. Login
+2. Open `/ai-tools` → **Pathfinder** (or `/ai/recommend`)
+3. Set interests, level, budget, category → **Get recommendations**
+4. Use **Like** / **Not for me** to improve future matches
+
 ## Roadmap status
 
 | Phase | Focus | Status |
@@ -109,7 +116,7 @@ GEMINI_API_KEY=...
 | 3 | Explore, details, auth UI, add/manage | Done |
 | 4 | Dashboard + Recharts | Done |
 | 5 | AI Course Writer | Done |
-| 6 | AI Pathfinder recommendations | Pending |
+| 6 | AI Pathfinder recommendations | Done |
 | 7 | Polish + security | Pending |
 | 8 | Deploy + submit | Pending |
 

@@ -13,7 +13,7 @@ export default function AiToolsPage() {
         <SectionHeading
           align="left"
           title="AI Tools"
-          subtitle="Use Aimers agents to write course content and (next) recommend learning paths."
+          subtitle="Use Aimers agents to write course content and recommend personalized learning paths."
         />
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -31,22 +31,23 @@ export default function AiToolsPage() {
             </Button>
           </article>
 
-          <article className="rounded-[var(--aimers-radius)] border border-aimers-border p-6 opacity-90">
-            <Compass className="h-6 w-6 text-aimers-muted" />
+          <article className="rounded-[var(--aimers-radius)] border border-aimers-border p-6">
+            <Compass className="h-6 w-6 text-aimers-gold" />
             <h2 className="mt-4 font-[family-name:var(--font-space-grotesk)] text-xl font-bold">
               Pathfinder
             </h2>
             <p className="mt-2 text-sm text-aimers-muted">
-              Personalized course recommendations arrive in Phase 6.
+              Get personalized course recommendations with reasons, then refine
+              results using filters and like/dislike feedback.
             </p>
-            <p className="mt-6 text-sm font-medium text-aimers-muted">
-              Coming next
-            </p>
+            <Button href="/ai/recommend" className="mt-6">
+              Open Pathfinder
+            </Button>
           </article>
         </div>
 
         <p className="mt-8 text-sm text-aimers-muted">
-          Tip: instructors can apply generated content directly into{" "}
+          Tip: instructors can apply Course Writer output into{" "}
           <Link href="/items/add" className="font-medium underline">
             Add Course
           </Link>

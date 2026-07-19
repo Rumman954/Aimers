@@ -236,3 +236,179 @@ export async function generateCourseContent(input: GenerateCourseInput): Promise
     provider: "offline",
   };
 }
+
+export const recommendationSchema = z.object({
+  recommendations: z
+    .array(
+      z.object({
+        courseId: z.string(),
+        reason: z.string().min(10),
+        matchScore: z.number().min(0).max(100),
+      })
+    )
+    .default([]),
+  learningPathTitle: z.string().optional(),
+  summary: z.string().optional(),
+});
+
+export type RecommendationResult = z.infer<typeof recommendationSchema>;
+
+export type RecommendCandidate = {
+  id: string;
+  title: string;
+  shortDescription: string;
+  category: string;
+  level: string;
+  price: number;
+  duration: string;
+  rating: number;
+  tags: string[];
+  students: number;
+};
+
+export type RecommendContext = {
+  interests: string[];
+  level?: string;
+  maxBudget?: number;
+  skills?: string[];
+  preferredDuration?: string;
+  likedCourseSlugs: string[];
+  dislikedCourseSlugs: string[];
+  recentViews: string[];
+  enrolled: string[];
+  candidates: RecommendCandidate[];
+};
+
+function rankOffline(ctx: RecommendContext): RecommendationResult {
+  const scored = ctx.candidates.map((course) => {
+    let score = course.rating * 12 + Math.min(course.students / 100, 20);
+    const hay = `${course.title} ${course.category} ${course.tags.join(" ")} ${course.shortDescription}`.toLowerCase();
+
+    for (const interest of ctx.interests) {
+      if (interest && hay.includes(interest.toLowerCase())) score += 18;
+    }
+    for (const skill of ctx.skills || []) {
+      if (skill && hay.includes(skill.toLowerCase())) score += 14;
+    }
+    if (ctx.level && course.level === ctx.level) score += 12;
+    if (ctx.maxBudget != null && course.price <= ctx.maxBudget) score += 8;
+    if (ctx.likedCourseSlugs.includes(course.id)) score += 10;
+    if (ctx.dislikedCourseSlugs.includes(course.id)) score -= 40;
+    if (ctx.enrolled.includes(course.id)) score -= 50;
+    if (ctx.recentViews.includes(course.id)) score += 6;
+
+    const reasons: string[] = [];
+    if (ctx.level && course.level === ctx.level) {
+      reasons.push(`matches your ${ctx.level} level`);
+    }
+    if (ctx.interests.some((i) => hay.includes(i.toLowerCase()))) {
+      reasons.push("aligns with your stated interests");
+    }
+    if (ctx.maxBudget != null && course.price <= ctx.maxBudget) {
+      reasons.push(`fits your budget (≤ $${ctx.maxBudget})`);
+    }
+    if (ctx.recentViews.includes(course.id)) {
+      reasons.push("similar to courses you recently viewed");
+    }
+    if (!reasons.length) {
+      reasons.push("strong learner ratings and catalog fit");
+    }
+
+    return {
+      courseId: course.id,
+      reason: `Recommended because it ${reasons.join(" and ")}.`,
+      matchScore: Math.max(1, Math.min(99, Math.round(score))),
+    };
+  });
+
+  scored.sort((a, b) => b.matchScore - a.matchScore);
+  const top = scored.slice(0, 6);
+
+  return {
+    recommendations: top,
+    learningPathTitle: "Your Aimers Pathfinder plan",
+    summary:
+      top.length > 0
+        ? `Based on your activity and filters, start with “${ctx.candidates.find((c) => c.id === top[0].courseId)?.title}” and continue through the ranked list.`
+        : "No strong matches yet. Broaden filters or explore more courses.",
+  };
+}
+
+export async function generateRecommendations(
+  ctx: RecommendContext
+): Promise<{ result: RecommendationResult; provider: "openai" | "gemini" | "offline" }> {
+  if (!ctx.candidates.length) {
+    return {
+      provider: "offline",
+      result: {
+        recommendations: [],
+        learningPathTitle: "Your Aimers Pathfinder plan",
+        summary: "No courses matched your filters. Try raising budget or clearing level.",
+      },
+    };
+  }
+
+  const system = `You are Aimers Pathfinder, a recommendation agent for an online education platform.
+Return ONLY valid JSON:
+{
+  "recommendations": [{ "courseId": string, "reason": string, "matchScore": number }],
+  "learningPathTitle": string,
+  "summary": string
+}
+Rules:
+- Only use courseId values from the provided candidate list.
+- Rank best matches first (3 to 6 items).
+- matchScore is 0-100.
+- Reasons must be specific to user context (interests, level, budget, history).`;
+
+  const user = `User context:
+${JSON.stringify(
+  {
+    interests: ctx.interests,
+    level: ctx.level,
+    maxBudget: ctx.maxBudget,
+    skills: ctx.skills,
+    preferredDuration: ctx.preferredDuration,
+    likedCourseSlugs: ctx.likedCourseSlugs,
+    dislikedCourseSlugs: ctx.dislikedCourseSlugs,
+    recentViews: ctx.recentViews,
+    enrolled: ctx.enrolled,
+  },
+  null,
+  2
+)}
+
+Candidates:
+${JSON.stringify(ctx.candidates, null, 2)}`;
+
+  const hasOpenAI = Boolean(env.OPENAI_API_KEY);
+  const hasGemini = Boolean(env.GEMINI_API_KEY);
+
+  try {
+    if (env.AI_PROVIDER === "openai" && hasOpenAI) {
+      const text = await callOpenAI(system, user);
+      return {
+        provider: "openai",
+        result: recommendationSchema.parse(extractJson(text)),
+      };
+    }
+    if ((env.AI_PROVIDER === "gemini" || !hasOpenAI) && hasGemini) {
+      const text = await callGemini(system, user);
+      return {
+        provider: "gemini",
+        result: recommendationSchema.parse(extractJson(text)),
+      };
+    }
+    if (hasOpenAI) {
+      const text = await callOpenAI(system, user);
+      return {
+        provider: "openai",
+        result: recommendationSchema.parse(extractJson(text)),
+      };
+    }
+  } catch {
+    // fall through to offline ranking
+  }
+
+  return { provider: "offline", result: rankOffline(ctx) };
+}

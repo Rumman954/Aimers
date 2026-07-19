@@ -10,9 +10,12 @@ export interface IUser extends Document {
   googleId?: string;
   avatar?: string;
   preferences: {
-    interests: string[];
-    level?: string;
-  };
+      interests: string[];
+      level?: string;
+      maxBudget?: number;
+      likedCourseSlugs: string[];
+      dislikedCourseSlugs: string[];
+    };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +41,9 @@ const userSchema = new Schema<IUser>(
     preferences: {
       interests: { type: [String], default: [] },
       level: { type: String },
+      maxBudget: { type: Number },
+      likedCourseSlugs: { type: [String], default: [] },
+      dislikedCourseSlugs: { type: [String], default: [] },
     },
   },
   { timestamps: true }

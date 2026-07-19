@@ -46,6 +46,10 @@ API base: `http://localhost:5000`
 - `POST /api/ai/course-content` — auth  
   Body: `{ topic, audience, level, moduleCount, tone, length, regenerate? }`  
   Uses OpenAI/Gemini when keys are set; otherwise offline template mode.
+- `POST /api/ai/recommend` — auth  
+  Body: `{ interests?, skills?, level?, maxBudget?, preferredDuration?, category? }`
+- `POST /api/ai/recommend/feedback` — auth  
+  Body: `{ courseId, action: "like" | "dislike" }`
 
 ## Demo credentials
 
