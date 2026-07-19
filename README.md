@@ -82,6 +82,23 @@ GOOGLE_CLIENT_ID=your_client_id_here
 
 Without the Client ID, email/password + Demo login still work; Google shows a setup note instead of the button.
 
+## AI Course Writer (Phase 5)
+
+1. Login (any account)
+2. Open `/ai-tools` → **Course Writer** (or `/ai/generate`)
+3. Enter topic, audience, level, modules, tone, length → **Generate** / **Regenerate**
+4. **Apply to Add Course** (instructors) to prefill `/items/add`
+
+Optional live LLM (otherwise offline template mode works):
+
+```env
+# backend/.env
+AI_PROVIDER=openai   # or gemini
+OPENAI_API_KEY=sk-...
+# or
+GEMINI_API_KEY=...
+```
+
 ## Roadmap status
 
 | Phase | Focus | Status |
@@ -91,7 +108,7 @@ Without the Client ID, email/password + Demo login still work; Google shows a se
 | 2 | Landing (7+ sections) + shell | Done |
 | 3 | Explore, details, auth UI, add/manage | Done |
 | 4 | Dashboard + Recharts | Done |
-| 5 | AI Course Writer | Pending |
+| 5 | AI Course Writer | Done |
 | 6 | AI Pathfinder recommendations | Pending |
 | 7 | Polish + security | Pending |
 | 8 | Deploy + submit | Pending |

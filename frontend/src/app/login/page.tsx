@@ -10,8 +10,15 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 
-const DEMO_EMAIL = "demo@aimers.com";
-const DEMO_PASSWORD = "Demo@1234";
+const DEMO_STUDENT = {
+  email: "demo@aimers.com",
+  password: "Demo@1234",
+};
+
+const DEMO_INSTRUCTOR = {
+  email: "instructor@aimers.com",
+  password: "Instructor@1234",
+};
 
 export default function LoginPage() {
   const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
@@ -24,6 +31,10 @@ export default function LoginPage() {
   }>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDemoOptions, setShowDemoOptions] = useState(false);
+  const [filledDemo, setFilledDemo] = useState<"student" | "instructor" | null>(
+    null
+  );
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -58,24 +69,14 @@ export default function LoginPage() {
     }
   }
 
-  async function handleDemoLogin() {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
+  function fillDemo(role: "student" | "instructor") {
+    const account = role === "student" ? DEMO_STUDENT : DEMO_INSTRUCTOR;
+    setEmail(account.email);
+    setPassword(account.password);
     setFieldErrors({});
     setError("");
-    setLoading(true);
-    try {
-      await login(DEMO_EMAIL, DEMO_PASSWORD);
-      router.push("/dashboard");
-    } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : "Demo login failed. Is the backend running and seeded?"
-      );
-    } finally {
-      setLoading(false);
-    }
+    setFilledDemo(role);
+    setShowDemoOptions(false);
   }
 
   const handleGoogle = useCallback(
@@ -135,16 +136,62 @@ export default function LoginPage() {
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </Button>
+
         <Button
           type="button"
           variant="secondary"
           size="lg"
           className="w-full"
-          onClick={handleDemoLogin}
+          onClick={() => setShowDemoOptions((open) => !open)}
           disabled={loading}
         >
           Demo login
         </Button>
+
+        {showDemoOptions ? (
+          <div className="space-y-3 rounded-[var(--aimers-radius)] border border-aimers-border bg-aimers-surface p-4">
+            <p className="text-sm font-medium text-aimers-black">
+              Continue demo as
+            </p>
+            <label className="flex cursor-pointer items-center gap-3 rounded-[var(--aimers-radius)] border border-aimers-border bg-aimers-white px-3 py-2.5 text-sm">
+              <input
+                type="radio"
+                name="demo-role"
+                checked={filledDemo === "student"}
+                onChange={() => fillDemo("student")}
+              />
+              <span>
+                <span className="font-medium">Student</span>
+                <span className="mt-0.5 block text-xs text-aimers-muted">
+                  {DEMO_STUDENT.email}
+                </span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 rounded-[var(--aimers-radius)] border border-aimers-border bg-aimers-white px-3 py-2.5 text-sm">
+              <input
+                type="radio"
+                name="demo-role"
+                checked={filledDemo === "instructor"}
+                onChange={() => fillDemo("instructor")}
+              />
+              <span>
+                <span className="font-medium">Instructor</span>
+                <span className="mt-0.5 block text-xs text-aimers-muted">
+                  {DEMO_INSTRUCTOR.email}
+                </span>
+              </span>
+            </label>
+          </div>
+        ) : null}
+
+        {filledDemo ? (
+          <p className="rounded-[var(--aimers-radius)] bg-aimers-surface px-3 py-2 text-center text-xs text-aimers-muted">
+            {filledDemo === "student" ? "Student" : "Instructor"} email and
+            password filled. Click{" "}
+            <span className="font-semibold text-aimers-black">Sign in</span> to
+            continue.
+          </p>
+        ) : null}
 
         <div className="relative py-1 text-center text-xs text-aimers-muted">
           <span className="bg-aimers-white px-2 relative z-10">or</span>
@@ -155,10 +202,6 @@ export default function LoginPage() {
           onCredential={handleGoogle}
           onError={(message) => setError(message)}
         />
-
-        <p className="text-center text-xs text-aimers-muted">
-          Demo: {DEMO_EMAIL} / {DEMO_PASSWORD}
-        </p>
       </form>
 
       <p className="mt-6 text-center text-sm text-aimers-muted">

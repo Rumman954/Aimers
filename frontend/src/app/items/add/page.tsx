@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,13 @@ const fieldClassName =
 export default function AddItemPage() {
   return (
     <ProtectedRoute roles={["instructor", "admin"]}>
-      <AddItemForm />
+      <Suspense
+        fallback={
+          <main className="p-16 text-sm text-aimers-muted">Loading…</main>
+        }
+      >
+        <AddItemForm />
+      </Suspense>
     </ProtectedRoute>
   );
 }
@@ -36,6 +42,7 @@ type FieldErrors = Partial<
 
 function AddItemForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
@@ -44,11 +51,38 @@ function AddItemForm() {
   const [level, setLevel] = useState<CourseLevel>("Beginner");
   const [duration, setDuration] = useState("6 weeks");
   const [thumbnail, setThumbnail] = useState(
-    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
   );
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState("");
+  const [aiApplied, setAiApplied] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("from") !== "ai") return;
+    try {
+      const raw = sessionStorage.getItem("aimers_ai_course_draft");
+      if (!raw) return;
+      const draft = JSON.parse(raw) as {
+        title?: string;
+        shortDescription?: string;
+        fullDescription?: string;
+        category?: string;
+        level?: CourseLevel;
+        duration?: string;
+      };
+      if (draft.title) setTitle(draft.title);
+      if (draft.shortDescription) setShortDescription(draft.shortDescription);
+      if (draft.fullDescription) setFullDescription(draft.fullDescription);
+      if (draft.category) setCategory(draft.category);
+      if (draft.level) setLevel(draft.level);
+      if (draft.duration) setDuration(draft.duration);
+      setAiApplied(true);
+      sessionStorage.removeItem("aimers_ai_course_draft");
+    } catch {
+      // ignore bad draft
+    }
+  }, [searchParams]);
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
@@ -114,6 +148,11 @@ function AddItemForm() {
         noValidate
         className="mt-8 space-y-5 rounded-[var(--aimers-radius)] border border-aimers-border p-6"
       >
+        {aiApplied ? (
+          <p className="rounded-[var(--aimers-radius)] bg-aimers-surface px-3 py-2 text-sm text-aimers-muted">
+            Fields prefilled from Aimers Course Writer. Review and publish.
+          </p>
+        ) : null}
         {error ? (
           <p className="rounded-[var(--aimers-radius)] bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
@@ -172,6 +211,9 @@ function AddItemForm() {
                 {item}
               </option>
             ))}
+            {!CATEGORIES.includes(category as (typeof CATEGORIES)[number]) ? (
+              <option value={category}>{category}</option>
+            ) : null}
           </select>
           {fieldErrors.category ? (
             <p className="mt-1 text-xs text-red-600">{fieldErrors.category}</p>
@@ -215,9 +257,14 @@ function AddItemForm() {
           required
         />
 
-        <Button type="submit" size="lg" disabled={loading}>
-          {loading ? "Saving…" : "Publish course"}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" size="lg" disabled={loading}>
+            {loading ? "Saving…" : "Publish course"}
+          </Button>
+          <Button href="/ai/generate" variant="secondary" size="lg">
+            Open Course Writer
+          </Button>
+        </div>
       </form>
     </main>
   );

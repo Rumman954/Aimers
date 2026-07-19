@@ -37,6 +37,16 @@ API base: `http://localhost:5000`
 - `DELETE /api/courses/:id` — owner
 - `POST /api/courses/:id/reviews` — auth
 
+### Dashboard
+- `GET /api/dashboard/stats` — auth
+- `GET /api/dashboard/enrollments` — auth
+- `POST /api/dashboard/enroll/:id` — auth
+
+### AI
+- `POST /api/ai/course-content` — auth  
+  Body: `{ topic, audience, level, moduleCount, tone, length, regenerate? }`  
+  Uses OpenAI/Gemini when keys are set; otherwise offline template mode.
+
 ## Demo credentials
 
 - Student: `demo@aimers.com` / `Demo@1234`
