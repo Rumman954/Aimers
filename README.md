@@ -116,6 +116,16 @@ GEMINI_API_KEY=...
 - Validated/escaped course search queries
 - Branded 404 + error pages, toast notifications, Open Graph metadata
 
+## Deploy (Phase 8)
+
+See **[DEPLOY.md](./DEPLOY.md)** for the full checklist.
+
+Quick path: **MongoDB Atlas** (DB) → **Render** (`backend/`) → **Vercel** (`frontend/`).
+
+Then set:
+- Backend `CLIENT_URL` = Vercel origin
+- Frontend `NEXT_PUBLIC_API_URL` = `https://YOUR-API.onrender.com/api`
+
 ## Roadmap status
 
 | Phase | Focus | Status |
@@ -128,7 +138,7 @@ GEMINI_API_KEY=...
 | 5 | AI Course Writer | Done |
 | 6 | AI Pathfinder recommendations | Done |
 | 7 | Polish + security | Done |
-| 8 | Deploy + submit | Pending |
+| 8 | Deploy + submit | Ready (see DEPLOY.md) |
 
 ## License
 

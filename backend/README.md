@@ -14,6 +14,8 @@ npm run dev
 
 API base: `http://localhost:5000`
 
+For production deploy steps, see the root [`DEPLOY.md`](../DEPLOY.md).
+
 ## Endpoints
 
 ### Health
