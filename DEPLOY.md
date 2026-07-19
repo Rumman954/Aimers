@@ -64,9 +64,10 @@ Optional: use the repo `render.yaml` blueprint and fill secrets in the Render da
 ## 3. Frontend on Vercel
 
 1. New Project → import the same GitHub repo.
-2. **Root Directory:** `frontend`
+2. **Important:** click **Edit** next to Root Directory → select **`frontend`** (not repo root).
 3. Framework: Next.js (auto-detected).
-4. Environment variables:
+4. Do **not** deploy Express `backend` on Vercel — that stays on Render.
+5. Environment variables:
 
 | Key | Value |
 |-----|--------|
@@ -74,8 +75,11 @@ Optional: use the repo `render.yaml` blueprint and fill secrets in the Render da
 | `NEXT_PUBLIC_SITE_URL` | `https://YOUR-APP.vercel.app` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | optional (Google Sign-In) |
 
-5. Deploy.
-6. Copy the Vercel URL → set Render `CLIENT_URL` to that exact origin (no trailing slash) → **redeploy** the API.
+6. Deploy.
+7. Copy the Vercel URL → set Render `CLIENT_URL` to that exact origin (no trailing slash) → **redeploy** the API.
+
+If the site shows **404: NOT_FOUND**: Root Directory is wrong.  
+Go to **Project → Settings → General → Root Directory → `frontend` → Save → Redeploy**.
 
 ---
 
