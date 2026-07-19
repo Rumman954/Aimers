@@ -106,6 +106,16 @@ GEMINI_API_KEY=...
 3. Set interests, level, budget, category → **Get recommendations**
 4. Use **Like** / **Not for me** to improve future matches
 
+## Polish + security (Phase 7)
+
+- Helmet, CORS, HPP, Mongo key stripping, XSS scrubbing
+- Global + auth + AI rate limits
+- Production fails fast without a real `JWT_SECRET` / `MONGODB_URI`
+- Demo credentials endpoint disabled in production
+- Stronger password rules (8+ chars, letter + number)
+- Validated/escaped course search queries
+- Branded 404 + error pages, toast notifications, Open Graph metadata
+
 ## Roadmap status
 
 | Phase | Focus | Status |
@@ -117,7 +127,7 @@ GEMINI_API_KEY=...
 | 4 | Dashboard + Recharts | Done |
 | 5 | AI Course Writer | Done |
 | 6 | AI Pathfinder recommendations | Done |
-| 7 | Polish + security | Pending |
+| 7 | Polish + security | Done |
 | 8 | Deploy + submit | Pending |
 
 ## License

@@ -6,6 +6,10 @@ import rateLimit from "express-rate-limit";
 import { env } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import {
+  hppMiddleware,
+  sanitizeInput,
+} from "./middleware/sanitize.js";
 import authRoutes from "./routes/auth.routes.js";
 import courseRoutes from "./routes/course.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
@@ -13,6 +17,10 @@ import aiRoutes from "./routes/ai.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 
 const app = express();
+
+if (env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 app.use(helmet());
 app.use(
@@ -22,6 +30,8 @@ app.use(
   })
 );
 app.use(express.json({ limit: "1mb" }));
+app.use(sanitizeInput);
+app.use(hppMiddleware);
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 
 app.use(

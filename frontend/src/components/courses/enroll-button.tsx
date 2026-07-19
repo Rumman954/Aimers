@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { api, ApiError } from "@/lib/api";
 
 type EnrollButtonProps = {
@@ -11,6 +12,7 @@ type EnrollButtonProps = {
 
 export function EnrollButton({ courseId }: EnrollButtonProps) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -54,10 +56,12 @@ export function EnrollButton({ courseId }: EnrollButtonProps) {
       );
       setEnrolled(true);
       setMessage(res.message || "Enrollment saved to your dashboard.");
+      toast("You're enrolled. Progress will show on your dashboard.", "success");
     } catch (err) {
-      setMessage(
-        err instanceof ApiError ? err.message : "Could not enroll right now."
-      );
+      const msg =
+        err instanceof ApiError ? err.message : "Could not enroll right now.";
+      setMessage(msg);
+      toast(msg, "error");
     } finally {
       setLoading(false);
     }

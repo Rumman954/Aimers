@@ -4,7 +4,7 @@ import { Course } from "../models/Course.js";
 import { Review } from "../models/Review.js";
 import { Interaction } from "../models/Interaction.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { slugify } from "../utils/helpers.js";
+import { escapeRegex, slugify } from "../utils/helpers.js";
 import type { AuthRequest } from "../middleware/auth.js";
 
 const createCourseSchema = z.object({
@@ -19,6 +19,21 @@ const createCourseSchema = z.object({
   images: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(["draft", "published"]).optional(),
+});
+
+const listCoursesSchema = z.object({
+  search: z.string().max(120).optional().default(""),
+  category: z.string().max(80).optional(),
+  level: z.enum(["Beginner", "Intermediate", "Advanced"]).optional(),
+  minPrice: z.coerce.number().min(0).optional(),
+  maxPrice: z.coerce.number().min(0).optional(),
+  minRating: z.coerce.number().min(0).max(5).optional(),
+  sort: z
+    .enum(["newest", "price_asc", "price_desc", "rating", "popular"])
+    .optional()
+    .default("newest"),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  limit: z.coerce.number().int().min(1).max(48).optional().default(12),
 });
 
 function mapCourse(course: InstanceType<typeof Course>) {
@@ -51,37 +66,39 @@ export const listCourses = async (
   next: NextFunction
 ) => {
   try {
+    const query = listCoursesSchema.parse(req.query);
     const {
-      search = "",
+      search,
       category,
       level,
       minPrice,
       maxPrice,
       minRating,
-      sort = "newest",
-      page = "1",
-      limit = "12",
-    } = req.query as Record<string, string>;
+      sort,
+      page,
+      limit,
+    } = query;
 
     const filter: Record<string, unknown> = { status: "published" };
 
-    if (search) {
+    if (search.trim()) {
+      const safe = escapeRegex(search.trim());
       filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { shortDescription: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
-        { tags: { $regex: search, $options: "i" } },
+        { title: { $regex: safe, $options: "i" } },
+        { shortDescription: { $regex: safe, $options: "i" } },
+        { category: { $regex: safe, $options: "i" } },
+        { tags: { $regex: safe, $options: "i" } },
       ];
     }
     if (category) filter.category = category;
     if (level) filter.level = level;
-    if (minPrice || maxPrice) {
+    if (minPrice != null || maxPrice != null) {
       filter.price = {
-        ...(minPrice ? { $gte: Number(minPrice) } : {}),
-        ...(maxPrice ? { $lte: Number(maxPrice) } : {}),
+        ...(minPrice != null ? { $gte: minPrice } : {}),
+        ...(maxPrice != null ? { $lte: maxPrice } : {}),
       };
     }
-    if (minRating) filter.rating = { $gte: Number(minRating) };
+    if (minRating != null) filter.rating = { $gte: minRating };
 
     const sortMap: Record<string, Record<string, 1 | -1>> = {
       newest: { createdAt: -1 },
@@ -91,15 +108,13 @@ export const listCourses = async (
       popular: { students: -1 },
     };
 
-    const pageNum = Math.max(1, Number(page) || 1);
-    const limitNum = Math.min(48, Math.max(1, Number(limit) || 12));
-    const skip = (pageNum - 1) * limitNum;
+    const skip = (page - 1) * limit;
 
     const [items, total] = await Promise.all([
       Course.find(filter)
         .sort(sortMap[sort] || sortMap.newest)
         .skip(skip)
-        .limit(limitNum),
+        .limit(limit),
       Course.countDocuments(filter),
     ]);
 
@@ -107,13 +122,16 @@ export const listCourses = async (
       success: true,
       data: items.map(mapCourse),
       pagination: {
-        page: pageNum,
-        limit: limitNum,
+        page,
+        limit,
         total,
-        pages: Math.ceil(total / limitNum) || 1,
+        pages: Math.ceil(total / limit) || 1,
       },
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return next(new AppError(error.errors[0]?.message || "Invalid query", 400));
+    }
     next(error);
   }
 };

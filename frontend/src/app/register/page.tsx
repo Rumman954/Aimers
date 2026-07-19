@@ -34,7 +34,11 @@ export default function RegisterPage() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       next.email = "Enter a valid email address";
     }
-    if (password.length < 6) next.password = "Password must be at least 6 characters";
+    if (password.length < 8) {
+      next.password = "Password must be at least 8 characters";
+    } else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      next.password = "Password must include a letter and a number";
+    }
     setFieldErrors(next);
     return Object.keys(next).length === 0;
   }

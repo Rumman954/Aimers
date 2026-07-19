@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { api, ApiError, type CourseApi } from "@/lib/api";
 
 export default function ManageItemsPage() {
@@ -17,6 +18,7 @@ export default function ManageItemsPage() {
 
 function ManageItemsContent() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-courses"],
     queryFn: async () => {
@@ -28,12 +30,16 @@ function ManageItemsContent() {
   });
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this course?")) return;
+    if (!window.confirm("Delete this course?")) return;
     try {
       await api(`/courses/${id}`, { method: "DELETE" });
       await queryClient.invalidateQueries({ queryKey: ["my-courses"] });
+      toast("Course deleted.", "success");
     } catch (err) {
-      alert(err instanceof ApiError ? err.message : "Delete failed");
+      toast(
+        err instanceof ApiError ? err.message : "Delete failed",
+        "error"
+      );
     }
   }
 

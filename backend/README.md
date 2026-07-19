@@ -24,7 +24,7 @@ API base: `http://localhost:5000`
 - `POST /api/auth/login` — `{ email, password }`
 - `POST /api/auth/google` — `{ credential }` (requires `GOOGLE_CLIENT_ID`)
 - `GET /api/auth/me` — Bearer token
-- `GET /api/auth/demo` — demo email/password
+- `GET /api/auth/demo` — demo email/password (**development only**)
 
 ### Courses
 - `GET /api/courses` — query: `search`, `category`, `level`, `minPrice`, `maxPrice`, `minRating`, `sort`, `page`, `limit`
@@ -50,6 +50,13 @@ API base: `http://localhost:5000`
   Body: `{ interests?, skills?, level?, maxBudget?, preferredDuration?, category? }`
 - `POST /api/ai/recommend/feedback` — auth  
   Body: `{ courseId, action: "like" | "dislike" }`
+
+## Security notes
+
+- Helmet, CORS (`CLIENT_URL`), HPP, Mongo key stripping, XSS scrubbing
+- Rate limits: global, auth (20/15m), AI (40/15m)
+- Production requires a real `JWT_SECRET` (not the default) and `MONGODB_URI`
+- Passwords: bcrypt cost 12; register requires 8+ chars with a letter and number
 
 ## Demo credentials
 

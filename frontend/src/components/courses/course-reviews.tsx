@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -118,6 +119,7 @@ function StarRating({
 
 export function CourseReviews({ courseId }: CourseReviewsProps) {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -144,14 +146,16 @@ export function CourseReviews({ courseId }: CourseReviewsProps) {
       setComment("");
       setRating(5);
       setFormError("");
+      toast("Review submitted. Thanks for the feedback!", "success");
       await queryClient.invalidateQueries({
         queryKey: ["course-reviews", courseId],
       });
     },
     onError: (err) => {
-      setFormError(
-        err instanceof ApiError ? err.message : "Could not submit review"
-      );
+      const msg =
+        err instanceof ApiError ? err.message : "Could not submit review";
+      setFormError(msg);
+      toast(msg, "error");
     },
   });
 

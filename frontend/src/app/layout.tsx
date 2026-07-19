@@ -23,6 +23,22 @@ export const metadata: Metadata = {
   },
   description:
     "Aimers — online education platform with courses, instructor tools, and AI learning support.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
+  openGraph: {
+    title: "Aimers — Aim higher. Learn smarter.",
+    description:
+      "Courses, instructor tools, and AI agents for focused online learning.",
+    siteName: "Aimers",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Aimers — Aim higher. Learn smarter.",
+    description:
+      "Courses, instructor tools, and AI agents for focused online learning.",
+  },
   icons: {
     icon: "/favicon.png",
   },

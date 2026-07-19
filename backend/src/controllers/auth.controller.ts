@@ -8,10 +8,17 @@ import { signToken } from "../utils/jwt.js";
 import { env } from "../config/env.js";
 import type { AuthRequest } from "../middleware/auth.js";
 
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(100)
+  .regex(/[A-Za-z]/, "Password must include a letter")
+  .regex(/[0-9]/, "Password must include a number");
+
 const registerSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email(),
-  password: z.string().min(6).max(100),
+  password: passwordSchema,
   role: z.enum(["student", "instructor"]).optional().default("student"),
 });
 
