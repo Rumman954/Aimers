@@ -39,7 +39,7 @@ npm run seed
 2. Settings:
    - **Root Directory:** `backend`
    - **Runtime:** Node
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm run render-build`
    - **Start Command:** `npm start`
 3. Environment variables:
 
