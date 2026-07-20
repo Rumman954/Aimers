@@ -3,15 +3,35 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { useToast } from "@/components/ui/toast";
+import { api, ApiError } from "@/lib/api";
 
 export function Newsletter() {
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      const res = await api<{ success: boolean; message: string }>("/newsletter", {
+        method: "POST",
+        body: { email: email.trim() },
+        auth: false,
+      });
+      setSubmitted(true);
+      toast(res.message, "success");
+    } catch (err) {
+      toast(
+        err instanceof ApiError ? err.message : "Could not subscribe right now.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -40,8 +60,14 @@ export function Newsletter() {
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 rounded-[var(--aimers-radius)] border border-aimers-white/20 bg-aimers-white/10 px-4 py-3 text-sm text-aimers-white placeholder:text-aimers-white/50 focus:border-aimers-gold focus:outline-none focus:ring-1 focus:ring-aimers-gold"
             />
-            <Button type="submit" variant="gold" size="lg" className="shrink-0">
-              Subscribe
+            <Button
+              type="submit"
+              variant="gold"
+              size="lg"
+              className="shrink-0"
+              disabled={loading}
+            >
+              {loading ? "Subscribing…" : "Subscribe"}
             </Button>
           </form>
         )}

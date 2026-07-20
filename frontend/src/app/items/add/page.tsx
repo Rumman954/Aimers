@@ -15,7 +15,7 @@ const fieldClassName =
 
 export default function AddItemPage() {
   return (
-    <ProtectedRoute roles={["instructor", "admin"]}>
+    <ProtectedRoute>
       <Suspense
         fallback={
           <main className="p-16 text-sm text-aimers-muted">Loading…</main>

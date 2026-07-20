@@ -4,13 +4,36 @@ import { Mail, MapPin } from "lucide-react";
 import { useState } from "react";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
+import { api, ApiError } from "@/lib/api";
 
 export default function ContactPage() {
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      const res = await api<{ success: boolean; message: string }>("/contact", {
+        method: "POST",
+        body: { name: name.trim(), email: email.trim(), message: message.trim() },
+        auth: false,
+      });
+      setSubmitted(true);
+      toast(res.message, "success");
+    } catch (err) {
+      toast(
+        err instanceof ApiError ? err.message : "Could not send your message.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -44,6 +67,8 @@ export default function ContactPage() {
                   name="name"
                   type="text"
                   required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
                 />
               </div>
@@ -59,6 +84,8 @@ export default function ContactPage() {
                   name="email"
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="mt-1.5 w-full rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
                 />
               </div>
@@ -74,11 +101,14 @@ export default function ContactPage() {
                   name="message"
                   rows={5}
                   required
+                  minLength={10}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   className="mt-1.5 w-full resize-y rounded-[var(--aimers-radius)] border border-aimers-border px-4 py-2.5 text-sm focus:border-aimers-black focus:outline-none focus:ring-1 focus:ring-aimers-black"
                 />
               </div>
-              <Button type="submit" size="lg">
-                Send message
+              <Button type="submit" size="lg" disabled={loading}>
+                {loading ? "Sending…" : "Send message"}
               </Button>
             </>
           )}

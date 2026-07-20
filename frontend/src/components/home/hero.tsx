@@ -1,28 +1,20 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { AimersLogo } from "@/components/brand/aimers-logo";
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-[60vh] max-h-[65vh] w-full flex-col items-center justify-center overflow-hidden">
-      <Image
-        src="/aimers-hero-bg.jpg"
-        alt=""
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
+    <section className="relative flex min-h-[60vh] max-h-[65vh] w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-aimers-surface via-aimers-white to-aimers-white">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        aria-hidden
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20% 20%, #D4A01733 0%, transparent 45%), radial-gradient(circle at 80% 10%, #0A0A0A0D 0%, transparent 40%)",
+        }}
       />
-      <div className="absolute inset-0 bg-aimers-white/75 backdrop-blur-[1px]" />
 
       <div className="relative z-10 flex flex-col items-center px-6 text-center">
-        <Image
-          src="/aimers-logo.png"
-          alt="Aimers"
-          width={410}
-          height={302}
-          className="animate-aimers-fade-up h-auto w-[220px] md:w-[320px]"
-          priority
-        />
+        <AimersLogo markSize="lg" className="animate-aimers-fade-up" />
         <p className="animate-aimers-fade-up-delay mt-6 max-w-md text-base text-aimers-black/80 md:text-lg">
           Aim higher. Learn smarter.
         </p>
@@ -30,8 +22,8 @@ export function Hero() {
           <Button href="/courses" size="lg">
             Explore courses
           </Button>
-          <Button href="/about" variant="secondary" size="lg">
-            Why Aimers
+          <Button href="/register" variant="secondary" size="lg">
+            Get started
           </Button>
         </div>
       </div>

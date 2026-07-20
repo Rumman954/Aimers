@@ -49,6 +49,7 @@ npm run seed
 | `MONGODB_URI` | Atlas SRV URI |
 | `JWT_SECRET` | long random string (16+ chars) |
 | `CLIENT_URL` | your Vercel URL (update after frontend deploy; no trailing slash) |
+| `GOOGLE_CLIENT_ID` | same Google OAuth Client ID as frontend |
 | `JWT_EXPIRES_IN` | `7d` (optional) |
 | `GOOGLE_CLIENT_ID` | same as frontend (optional) |
 | `OPENAI_API_KEY` / `GEMINI_API_KEY` | optional |
@@ -73,7 +74,7 @@ Optional: use the repo `render.yaml` blueprint and fill secrets in the Render da
 |-----|--------|
 | `NEXT_PUBLIC_API_URL` | `https://YOUR-API.onrender.com/api` |
 | `NEXT_PUBLIC_SITE_URL` | `https://YOUR-APP.vercel.app` |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | optional (Google Sign-In) |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | same Google OAuth Client ID as backend |
 
 6. Deploy.
 7. Copy the Vercel URL → set Render `CLIENT_URL` to that exact origin (no trailing slash) → **redeploy** the API.

@@ -53,6 +53,12 @@ For production deploy steps, see the root [`DEPLOY.md`](../DEPLOY.md).
 - `POST /api/ai/recommend/feedback` — auth  
   Body: `{ courseId, action: "like" | "dislike" }`
 
+### Contact
+- `POST /api/contact` — public  
+  Body: `{ name, email, message }`
+- `POST /api/newsletter` — public  
+  Body: `{ email }`
+
 ## Security notes
 
 - Helmet, CORS (`CLIENT_URL`), HPP, Mongo key stripping, XSS scrubbing

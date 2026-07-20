@@ -2,6 +2,22 @@
 
 Online education platform — courses, instructor tools, and agentic AI (Course Writer + Pathfinder).
 
+## Live submission
+
+| | URL |
+|---|-----|
+| **Website** | https://aimers-eight.vercel.app |
+| **API health** | https://aimers-a9mn.onrender.com/api/health |
+| **GitHub** | https://github.com/Rumman954/Aimers |
+
+**Demo accounts**
+- Student: `demo@aimers.com` / `Demo@1234`
+- Instructor: `instructor@aimers.com` / `Instructor@1234`
+
+**AI features**
+- Course Writer: `/ai/generate`
+- Pathfinder recommendations: `/ai/recommend`
+
 ## Structure
 
 ```
@@ -62,17 +78,19 @@ Runs at `http://localhost:3000`
 3. Create **OAuth client ID** → Application type: **Web application**
 4. Authorized JavaScript origins:
    - `http://localhost:3000`
+   - `https://aimers-eight.vercel.app` (production)
 5. Authorized redirect URIs (optional for GIS button):
    - `http://localhost:3000`
+   - `https://aimers-eight.vercel.app`
 6. Copy the **Client ID**
 7. Paste it in both env files (same value):
 
-**`frontend/.env.local`**
+**`frontend/.env.local`** (local) and **Vercel Environment Variables** (production)
 ```
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_client_id_here
 ```
 
-**`backend/.env`**
+**`backend/.env`** (local) and **Render Environment Variables** (production)
 ```
 GOOGLE_CLIENT_ID=your_client_id_here
 ```
@@ -138,7 +156,17 @@ Then set:
 | 5 | AI Course Writer | Done |
 | 6 | AI Pathfinder recommendations | Done |
 | 7 | Polish + security | Done |
-| 8 | Deploy + submit | Ready (see DEPLOY.md) |
+| 8 | Deploy + submit | Done |
+
+## Rubric compliance
+
+- Full stack: Next.js + TS + Tailwind + TanStack Query + Recharts + Express + MongoDB + JWT
+- Landing: 9 sections, sticky nav, footer with working links
+- Explore: search, filters, sort, pagination, skeleton loaders
+- Auth: login/register, demo autofill, Google OAuth (set Client ID in env)
+- Protected CRUD: `/items/add`, `/items/manage`
+- Extra pages: About, Contact, Privacy, Terms, Dashboard, AI Tools
+- AI agents: Course Writer + Pathfinder (recommendations + feedback memory)
 
 ## License
 

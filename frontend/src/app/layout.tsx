@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       "Courses, instructor tools, and AI agents for focused online learning.",
   },
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.svg",
   },
 };
 

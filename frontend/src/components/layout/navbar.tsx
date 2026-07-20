@@ -1,17 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AimersLogo } from "@/components/brand/aimers-logo";
 import { cn } from "@/lib/utils";
 
 const loggedOutLinks = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
   { href: "/login", label: "Login" },
+  { href: "/register", label: "Register" },
 ];
 
 const loggedInLinks = [
@@ -20,6 +22,7 @@ const loggedInLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/ai-tools", label: "AI Tools" },
   { href: "/manage", label: "Manage" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {
@@ -31,18 +34,15 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-aimers-border/60 bg-aimers-white/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8">
-        <Link href="/" aria-label="Aimers home" onClick={() => setMobileOpen(false)}>
-          <Image
-            src="/aimers-logo.png"
-            alt="Aimers"
-            width={88}
-            height={65}
-            className="h-10 w-auto"
-            priority
-          />
+        <Link
+          href="/"
+          aria-label="Aimers home"
+          onClick={() => setMobileOpen(false)}
+        >
+          <AimersLogo markSize="sm" />
         </Link>
 
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="hidden items-center gap-6 lg:gap-8 md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
               <Link
