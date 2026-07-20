@@ -6,6 +6,7 @@ import type { AuthRequest } from "../middleware/auth.js";
 import {
   generateCourseContent,
   generateRecommendations,
+  generateCourseSupportReply,
 } from "../services/ai.service.js";
 import { Course } from "../models/Course.js";
 import { Enrollment } from "../models/Enrollment.js";
@@ -45,6 +46,17 @@ const recommendSchema = z.object({
 const feedbackSchema = z.object({
   courseId: z.string().min(1),
   action: z.enum(["like", "dislike"]),
+});
+
+const chatTurnSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(4000),
+});
+
+const courseSupportSchema = z.object({
+  courseId: z.string().min(1).max(120),
+  message: z.string().min(1).max(2000),
+  history: z.array(chatTurnSchema).max(20).optional().default([]),
 });
 
 export const generateCourse = async (
@@ -285,5 +297,77 @@ export const recommendationFeedback = async (
       return next(new AppError(error.errors[0]?.message || "Invalid input", 400));
     }
     next(error);
+  }
+};
+
+export const courseSupportChat = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) throw new AppError("Authentication required", 401);
+
+    const body = courseSupportSchema.parse(req.body);
+    const course =
+      (await Course.findOne({ slug: body.courseId })) ||
+      (await Course.findById(body.courseId).catch(() => null));
+
+    if (!course || course.status !== "published") {
+      throw new AppError("Course not found", 404);
+    }
+
+    const enrolled = await Enrollment.findOne({
+      user: req.user._id,
+      course: course._id,
+    });
+
+    if (!enrolled) {
+      throw new AppError("Enroll in this course to use the support assistant", 403);
+    }
+
+    const result = await generateCourseSupportReply(
+      {
+        courseId: course.slug,
+        title: course.title,
+        shortDescription: course.shortDescription,
+        fullDescription: course.fullDescription,
+        category: course.category,
+        level: course.level,
+        duration: course.duration,
+        price: course.price,
+        instructorName: course.instructorName,
+        rating: course.rating,
+        reviewCount: course.reviewCount,
+        tags: course.tags || [],
+        students: course.students,
+        studentName: req.user.name,
+        enrolled: true,
+      },
+      body.message,
+      body.history
+    );
+
+    res.json({
+      success: true,
+      provider: result.provider,
+      offline: result.provider === "offline",
+      message:
+        result.provider === "offline"
+          ? "Answered with Aimers offline assistant. Add OPENAI_API_KEY or GEMINI_API_KEY for live chat."
+          : `Answered with ${result.provider}`,
+      data: {
+        reply: result.reply,
+      },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return next(new AppError(error.errors[0]?.message || "Invalid input", 400));
+    }
+    next(
+      error instanceof Error
+        ? new AppError(error.message || "Course support chat failed", 502)
+        : error
+    );
   }
 };

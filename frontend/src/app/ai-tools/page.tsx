@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Compass } from "lucide-react";
+import { Sparkles, Compass, MessageCircle } from "lucide-react";
 
 export default function AiToolsPage() {
   return (
@@ -13,10 +13,10 @@ export default function AiToolsPage() {
         <SectionHeading
           align="left"
           title="AI Tools"
-          subtitle="Use Aimers agents to write course content and recommend personalized learning paths."
+          subtitle="Use Aimers agents to write course content, get personalized recommendations, and chat with course support after you enroll."
         />
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <article className="rounded-[var(--aimers-radius)] border border-aimers-border p-6">
             <Sparkles className="h-6 w-6 text-aimers-gold" />
             <h2 className="mt-4 font-[family-name:var(--font-space-grotesk)] text-xl font-bold">
@@ -42,6 +42,20 @@ export default function AiToolsPage() {
             </p>
             <Button href="/ai/recommend" className="mt-6">
               Open Pathfinder
+            </Button>
+          </article>
+
+          <article className="rounded-[var(--aimers-radius)] border border-aimers-border p-6">
+            <MessageCircle className="h-6 w-6 text-aimers-gold" />
+            <h2 className="mt-4 font-[family-name:var(--font-space-grotesk)] text-xl font-bold">
+              Course Support
+            </h2>
+            <p className="mt-2 text-sm text-aimers-muted">
+              Enroll in a course, then open its detail page to chat with an AI
+              assistant about overview, timeline, instructor, and study tips.
+            </p>
+            <Button href="/courses" variant="secondary" className="mt-6">
+              Browse courses
             </Button>
           </article>
         </div>

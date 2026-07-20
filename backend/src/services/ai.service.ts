@@ -471,3 +471,190 @@ ${JSON.stringify(ctx.candidates, null, 2)}`;
 
   return { provider: "offline", result: rankOffline(ctx) };
 }
+
+export type ChatTurn = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type CourseSupportContext = {
+  courseId: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string;
+  category: string;
+  level: string;
+  duration: string;
+  price: number;
+  instructorName: string;
+  rating: number;
+  reviewCount: number;
+  tags: string[];
+  students: number;
+  studentName: string;
+  enrolled: boolean;
+};
+
+function buildCourseSupportSystemPrompt(ctx: CourseSupportContext) {
+  return `You are Aimers Course Support, a helpful assistant for enrolled students on an online education platform.
+Answer questions ONLY about this course using the context below. Be concise, friendly, and practical.
+If asked about topics outside this course, politely redirect the student back to course-related help.
+Do not invent modules, lessons, or syllabus details that are not in the context.
+If information is missing, say so and suggest what the student can check on the course page.
+
+Course context:
+- Title: ${ctx.title}
+- Category: ${ctx.category}
+- Level: ${ctx.level}
+- Duration: ${ctx.duration}
+- Price: $${ctx.price}
+- Instructor: ${ctx.instructorName}
+- Rating: ${ctx.rating} (${ctx.reviewCount} reviews)
+- Tags: ${ctx.tags.join(", ") || "none"}
+- Short description: ${ctx.shortDescription}
+- Full description: ${ctx.fullDescription}
+- Student: ${ctx.studentName}
+- Enrolled: ${ctx.enrolled ? "yes" : "no"}`;
+}
+
+async function callOpenAIChat(
+  system: string,
+  history: ChatTurn[],
+  temperature = 0.7
+): Promise<string> {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      temperature,
+      messages: [
+        { role: "system", content: system },
+        ...history.map((turn) => ({ role: turn.role, content: turn.content })),
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`OpenAI error: ${res.status} ${err}`);
+  }
+
+  const data = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  return data.choices?.[0]?.message?.content?.trim() || "";
+}
+
+async function callGeminiChat(
+  system: string,
+  history: ChatTurn[],
+  temperature = 0.7
+): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+  const contents = history.map((turn) => ({
+    role: turn.role === "assistant" ? "model" : "user",
+    parts: [{ text: turn.content }],
+  }));
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents,
+      generationConfig: { temperature },
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini error: ${res.status} ${err}`);
+  }
+
+  const data = (await res.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+}
+
+export function generateOfflineCourseSupport(
+  ctx: CourseSupportContext,
+  message: string
+): string {
+  const q = message.toLowerCase();
+
+  if (/hello|hi|hey|start/.test(q)) {
+    return `Hi ${ctx.studentName.split(" ")[0] || "there"}! I'm your Aimers assistant for "${ctx.title}". Ask me about the course overview, duration, level, instructor, or how to get started.`;
+  }
+  if (/about|what is|learn|cover|topic|overview/.test(q)) {
+    return `"${ctx.title}" is a ${ctx.level.toLowerCase()} ${ctx.category} course. ${ctx.shortDescription} ${ctx.fullDescription}`;
+  }
+  if (/long|duration|week|time|how many/.test(q)) {
+    return `This course runs for ${ctx.duration}. Plan steady weekly progress and use your dashboard to track completion.`;
+  }
+  if (/level|beginner|intermediate|advanced|difficult|prerequisite/.test(q)) {
+    return `This course is labeled ${ctx.level}. If you're new to ${ctx.category}, start with the overview section and revisit fundamentals before moving to applied exercises.`;
+  }
+  if (/instructor|teacher|who teach/.test(q)) {
+    return `${ctx.instructorName} is the instructor for "${ctx.title}". Focus on the course milestones and practice activities to get the most from their material.`;
+  }
+  if (/price|cost|pay|fee|worth/.test(q)) {
+    return `"${ctx.title}" is priced at $${ctx.price}. You already have access as an enrolled student — use the dashboard to track progress and stay on schedule.`;
+  }
+  if (/rating|review|student/.test(q)) {
+    return `Learners rate this course ${ctx.rating}/5 across ${ctx.reviewCount} reviews, with ${ctx.students.toLocaleString()} students enrolled. Check the reviews section for peer feedback.`;
+  }
+  if (/start|begin|first step|how do i/.test(q)) {
+    return `To get started in "${ctx.title}": (1) review the course overview, (2) note the ${ctx.duration} timeline, (3) set a weekly study goal, and (4) track progress from your Aimers dashboard.`;
+  }
+  if (/tag|category|field/.test(q)) {
+    return `This course sits in ${ctx.category}${ctx.tags.length ? ` with tags: ${ctx.tags.join(", ")}` : ""}.`;
+  }
+
+  return `I can help with "${ctx.title}" — try asking about the course overview, duration (${ctx.duration}), level (${ctx.level}), instructor (${ctx.instructorName}), or how to get started.`;
+}
+
+export async function generateCourseSupportReply(
+  ctx: CourseSupportContext,
+  message: string,
+  history: ChatTurn[] = []
+): Promise<{ reply: string; provider: "openai" | "gemini" | "offline" }> {
+  const trimmedHistory = history.slice(-10);
+  const turns: ChatTurn[] = [
+    ...trimmedHistory,
+    { role: "user", content: message },
+  ];
+  const system = buildCourseSupportSystemPrompt(ctx);
+  const hasOpenAI = Boolean(env.OPENAI_API_KEY);
+  const hasGemini = Boolean(env.GEMINI_API_KEY);
+
+  try {
+    if (env.AI_PROVIDER === "openai" && hasOpenAI) {
+      const reply = await callOpenAIChat(system, turns);
+      if (reply) return { reply, provider: "openai" };
+    }
+    if ((env.AI_PROVIDER === "gemini" || !hasOpenAI) && hasGemini) {
+      const reply = await callGeminiChat(system, turns);
+      if (reply) return { reply, provider: "gemini" };
+    }
+    if (hasOpenAI) {
+      const reply = await callOpenAIChat(system, turns);
+      if (reply) return { reply, provider: "openai" };
+    }
+    if (hasGemini) {
+      const reply = await callGeminiChat(system, turns);
+      if (reply) return { reply, provider: "gemini" };
+    }
+  } catch {
+    // fall through to offline
+  }
+
+  return {
+    reply: generateOfflineCourseSupport(ctx, message),
+    provider: "offline",
+  };
+}

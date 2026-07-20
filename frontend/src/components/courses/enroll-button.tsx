@@ -56,6 +56,9 @@ export function EnrollButton({ courseId }: EnrollButtonProps) {
       );
       setEnrolled(true);
       setMessage(res.message || "Enrollment saved to your dashboard.");
+      window.dispatchEvent(
+        new CustomEvent("aimers:enrolled", { detail: { courseId } })
+      );
       toast("You're enrolled. Progress will show on your dashboard.", "success");
     } catch (err) {
       const msg =

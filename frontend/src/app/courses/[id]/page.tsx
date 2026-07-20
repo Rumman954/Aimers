@@ -4,6 +4,7 @@ import { Clock, Star, Users } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
 import { CourseImage } from "@/components/courses/course-image";
 import { CourseReviews } from "@/components/courses/course-reviews";
+import { CourseSupportChat } from "@/components/courses/course-support-chat";
 import { EnrollButton } from "@/components/courses/enroll-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -180,6 +181,8 @@ export default async function CourseDetailPage({
         </section>
 
         <CourseReviews courseId={id} />
+
+        <CourseSupportChat courseId={id} courseTitle={course.title} />
 
         {related.length > 0 ? (
           <section className="mt-16">
