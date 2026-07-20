@@ -14,7 +14,7 @@ export function Hero() {
       />
 
       <div className="relative z-10 flex flex-col items-center px-6 text-center">
-        <AimersLogo markSize="lg" className="animate-aimers-fade-up" />
+        <AimersLogo variant="hero" priority className="animate-aimers-fade-up" />
         <p className="animate-aimers-fade-up-delay mt-6 max-w-md text-base text-aimers-black/80 md:text-lg">
           Aim higher. Learn smarter.
         </p>

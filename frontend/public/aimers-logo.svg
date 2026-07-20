@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" fill="none" role="img" aria-label="Aimers">
+  <text
+    x="160"
+    y="98"
+    text-anchor="middle"
+    font-family="Outfit, system-ui, sans-serif"
+    font-size="108"
+    font-weight="700"
+    fill="#D4A017"
+  >@</text>
+  <text
+    x="160"
+    y="178"
+    text-anchor="middle"
+    font-family="Space Grotesk, system-ui, sans-serif"
+    font-size="44"
+    font-weight="700"
+    letter-spacing="0.24em"
+    fill="#0A0A0A"
+  >AIMERS</text>
+</svg>

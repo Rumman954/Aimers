@@ -29,10 +29,9 @@ Aimers/
 
 ## Brand
 
-- Logo: `@` mark + **AIMERS**
+- Logo: `@` mark + **AIMERS** (`frontend/public/aimers-logo.svg`)
 - Colors: black `#0A0A0A`, white `#FFFFFF`, gold `#D4A017`
 - Fonts: Outfit (UI) · Space Grotesk (display)
-- Hero background: `frontend/public/aimers-hero-bg.jpg`
 
 ## Quick start
 

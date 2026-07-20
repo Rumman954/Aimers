@@ -1,55 +1,32 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type AimersLogoProps = {
   className?: string;
-  markSize?: "sm" | "md" | "lg";
-  showWordmark?: boolean;
+  variant?: "nav" | "hero";
+  priority?: boolean;
 };
 
-const markSizes = {
-  sm: "text-xl",
-  md: "text-3xl",
-  lg: "text-5xl md:text-6xl",
-};
-
-const wordSizes = {
-  sm: "text-sm tracking-[0.2em]",
-  md: "text-lg tracking-[0.22em]",
-  lg: "text-2xl tracking-[0.24em] md:text-3xl",
+const sizes = {
+  nav: { width: 88, height: 60, className: "h-10 w-auto" },
+  hero: { width: 320, height: 220, className: "h-auto w-[240px] md:w-[320px]" },
 };
 
 export function AimersLogo({
   className,
-  markSize = "md",
-  showWordmark = true,
+  variant = "nav",
+  priority = false,
 }: AimersLogoProps) {
+  const size = sizes[variant];
+
   return (
-    <span
-      className={cn(
-        "inline-flex flex-col items-center leading-none text-aimers-black",
-        className
-      )}
-      aria-label="Aimers"
-    >
-      <span
-        className={cn(
-          "font-bold text-aimers-gold",
-          markSizes[markSize]
-        )}
-        aria-hidden
-      >
-        @
-      </span>
-      {showWordmark ? (
-        <span
-          className={cn(
-            "mt-1 font-[family-name:var(--font-space-grotesk)] font-bold",
-            wordSizes[markSize]
-          )}
-        >
-          AIMERS
-        </span>
-      ) : null}
-    </span>
+    <Image
+      src="/aimers-logo.svg"
+      alt="Aimers"
+      width={size.width}
+      height={size.height}
+      priority={priority}
+      className={cn(size.className, className)}
+    />
   );
 }

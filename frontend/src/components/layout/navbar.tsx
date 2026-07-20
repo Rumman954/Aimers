@@ -39,7 +39,7 @@ export function Navbar() {
           aria-label="Aimers home"
           onClick={() => setMobileOpen(false)}
         >
-          <AimersLogo markSize="sm" />
+          <AimersLogo variant="nav" priority />
         </Link>
 
         <ul className="hidden items-center gap-6 lg:gap-8 md:flex">
