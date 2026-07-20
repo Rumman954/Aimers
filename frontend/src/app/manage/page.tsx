@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ManagePage() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute roles={["instructor", "admin"]}>
       <main className="mx-auto max-w-4xl flex-1 px-4 py-16 md:px-6 lg:px-8">
         <SectionHeading
           align="left"

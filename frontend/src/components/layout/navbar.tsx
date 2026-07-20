@@ -20,15 +20,23 @@ const loggedInLinks = [
   { href: "/courses", label: "Courses" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/ai-tools", label: "AI Tools" },
-  { href: "/manage", label: "Manage" },
   { href: "/contact", label: "Contact" },
 ];
 
+const instructorLinks = [{ href: "/items/manage", label: "Manage" }];
+
 export function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navLinks = isAuthenticated ? loggedInLinks : loggedOutLinks;
+  const navLinks = isAuthenticated
+    ? [
+        ...loggedInLinks,
+        ...(user?.role === "instructor" || user?.role === "admin"
+          ? instructorLinks
+          : []),
+      ]
+    : loggedOutLinks;
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-aimers-border/60 bg-aimers-white/80 backdrop-blur-md">
