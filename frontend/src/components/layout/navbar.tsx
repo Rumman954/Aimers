@@ -23,6 +23,8 @@ const loggedInLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
+const studentLinks = [{ href: "/my-class", label: "My Class" }];
+
 const instructorLinks = [{ href: "/items/manage", label: "Manage" }];
 
 export function Navbar() {
@@ -31,7 +33,9 @@ export function Navbar() {
 
   const navLinks = isAuthenticated
     ? [
-        ...loggedInLinks,
+        ...loggedInLinks.slice(0, 3),
+        ...(user?.role === "student" ? studentLinks : []),
+        ...loggedInLinks.slice(3),
         ...(user?.role === "instructor" || user?.role === "admin"
           ? instructorLinks
           : []),

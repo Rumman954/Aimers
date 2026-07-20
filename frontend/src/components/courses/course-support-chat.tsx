@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bot, Send } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AIMERS_GREETING } from "@/components/courses/aimers-chat-panel";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -50,7 +51,7 @@ export function CourseSupportChat({
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: `Hi! I'm your Aimers assistant for "${courseTitle}". Ask me about the course overview, duration, level, instructor, or how to get started.`,
+      content: AIMERS_GREETING,
     },
   ]);
   const [input, setInput] = useState("");
@@ -154,7 +155,7 @@ export function CourseSupportChat({
           <Bot className="mt-1 h-6 w-6 shrink-0 text-aimers-gold" />
           <div>
             <h2 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold">
-              Course Support Assistant
+              Aimers Support
             </h2>
             <p className="mt-2 text-sm text-aimers-muted">
               Sign in and enroll to chat with an AI assistant about this course.
@@ -175,7 +176,7 @@ export function CourseSupportChat({
           <Bot className="mt-1 h-6 w-6 shrink-0 text-aimers-gold" />
           <div>
             <h2 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold">
-              Course Support Assistant
+              Aimers Support
             </h2>
             <p className="mt-2 text-sm text-aimers-muted">
               Enroll in this course to unlock the support chatbot. It can answer
@@ -203,7 +204,7 @@ export function CourseSupportChat({
         <Bot className="mt-1 h-6 w-6 shrink-0 text-aimers-gold" />
         <div className="min-w-0 flex-1">
           <h2 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold">
-            Course Support Assistant
+            Aimers Support
           </h2>
           <p className="mt-2 text-sm text-aimers-muted">
             Ask course-related questions as you learn. Answers use this course&apos;s
@@ -258,7 +259,7 @@ export function CourseSupportChat({
         <input
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Ask about this course…"
+          placeholder="Describe your problem or question…"
           className={fieldClass}
           disabled={loading}
           maxLength={2000}

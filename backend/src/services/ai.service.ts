@@ -496,9 +496,11 @@ export type CourseSupportContext = {
 };
 
 function buildCourseSupportSystemPrompt(ctx: CourseSupportContext) {
-  return `You are Aimers Course Support, a helpful assistant for enrolled students on an online education platform.
-Answer questions ONLY about this course using the context below. Be concise, friendly, and practical.
-If asked about topics outside this course, politely redirect the student back to course-related help.
+  return `You are Aimers, a friendly support assistant for enrolled students on an online education platform.
+Your name is Aimers. Be warm, helpful, and practical when students describe problems, confusion, or questions.
+Listen to what the student describes and respond directly to their situation with clear next steps.
+Answer using this course context when relevant. If the student describes a learning problem, suggest concrete study actions tied to this course.
+If asked about topics completely outside this course, politely redirect them back to course-related help.
 Do not invent modules, lessons, or syllabus details that are not in the context.
 If information is missing, say so and suggest what the student can check on the course page.
 
@@ -588,7 +590,10 @@ export function generateOfflineCourseSupport(
   const q = message.toLowerCase();
 
   if (/hello|hi|hey|start/.test(q)) {
-    return `Hi ${ctx.studentName.split(" ")[0] || "there"}! I'm your Aimers assistant for "${ctx.title}". Ask me about the course overview, duration, level, instructor, or how to get started.`;
+    return `Hello I'm Aimers. I'm your support assistant. How can I help you with "${ctx.title}" today?`;
+  }
+  if (/stuck|problem|issue|confused|don't understand|do not understand|hard|difficult|help me|struggling/.test(q)) {
+    return `I hear you're having trouble with "${ctx.title}". Try this: (1) re-read the overview for ${ctx.category} basics, (2) break the topic into smaller steps, (3) practice one ${ctx.level.toLowerCase()}-level exercise at a time, and (4) ask me a specific part you're stuck on. What exactly feels unclear right now?`;
   }
   if (/about|what is|learn|cover|topic|overview/.test(q)) {
     return `"${ctx.title}" is a ${ctx.level.toLowerCase()} ${ctx.category} course. ${ctx.shortDescription} ${ctx.fullDescription}`;
