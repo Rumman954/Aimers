@@ -58,6 +58,7 @@ function CourseWriter() {
   const [tone, setTone] = useState(TONES[0]);
   const [length, setLength] = useState<"short" | "medium" | "long">("medium");
   const [loading, setLoading] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [result, setResult] = useState<CourseContent | null>(null);
@@ -83,13 +84,18 @@ function CourseWriter() {
       return;
     }
     setError("");
-    setInfo("");
+    setInfo(regenerate ? "Regenerating a fresh alternative…" : "");
     setCopied(false);
+    setRegenerating(regenerate);
     setLoading(true);
     try {
       const res = await api<GenerateResponse>("/ai/course-content", {
         method: "POST",
-        body: { ...payload, regenerate },
+        body: {
+          ...payload,
+          regenerate,
+          variationSeed: regenerate ? Date.now() : undefined,
+        },
       });
       setResult(res.data);
       setInfo(res.message || `Generated with ${res.provider}`);
@@ -101,6 +107,7 @@ function CourseWriter() {
       );
     } finally {
       setLoading(false);
+      setRegenerating(false);
     }
   }
 
@@ -268,7 +275,7 @@ function CourseWriter() {
           <div className="flex flex-wrap gap-3 pt-2">
             <Button type="submit" size="lg" disabled={loading || !canGenerate}>
               <Sparkles className="h-4 w-4" />
-              {loading ? "Generating…" : "Generate"}
+              {loading && !regenerating ? "Generating…" : "Generate"}
             </Button>
             <Button
               type="button"
@@ -277,8 +284,8 @@ function CourseWriter() {
               disabled={loading || !result}
               onClick={() => void generate(true)}
             >
-              <RefreshCw className="h-4 w-4" />
-              Regenerate
+              <RefreshCw className={`h-4 w-4 ${loading && regenerating ? "animate-spin" : ""}`} />
+              {loading && regenerating ? "Regenerating…" : "Regenerate"}
             </Button>
           </div>
         </form>
@@ -294,14 +301,23 @@ function CourseWriter() {
             </div>
           ) : null}
 
-          {loading ? (
+          {loading && !result ? (
             <p className="text-sm text-aimers-muted">
-              Aimers Course Writer is thinking…
+              {regenerating
+                ? "Regenerating a fresh alternative version…"
+                : "Aimers Course Writer is thinking…"}
             </p>
           ) : null}
 
           {result ? (
-            <div className="space-y-5">
+            <div
+              className={`space-y-5 ${loading && regenerating ? "opacity-60" : ""}`}
+            >
+              {loading && regenerating ? (
+                <p className="text-sm font-medium text-aimers-gold">
+                  Regenerating a fresh alternative version…
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 <Button type="button" size="sm" variant="secondary" onClick={handleCopy}>
                   <Copy className="h-4 w-4" />

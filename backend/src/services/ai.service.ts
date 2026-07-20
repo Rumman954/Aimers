@@ -31,6 +31,7 @@ export type GenerateCourseInput = {
   tone: string;
   length: "short" | "medium" | "long";
   regenerate?: boolean;
+  variationSeed?: number;
 };
 
 const LENGTH_GUIDE = {
@@ -59,7 +60,7 @@ Do not invent payment or fake reviews.`;
 
 function buildUserPrompt(input: GenerateCourseInput) {
   const variation = input.regenerate
-    ? "Create a fresh alternative version with different module titles and wording."
+    ? `Create a fresh alternative version with different module titles, outcomes, and wording. Variation seed: ${input.variationSeed ?? Date.now()}. Do not repeat the previous structure verbatim.`
     : "Create the strongest first version.";
 
   return `Design a course with these inputs:
@@ -86,7 +87,11 @@ function extractJson(text: string): unknown {
   return JSON.parse(raw.slice(start, end + 1));
 }
 
-async function callOpenAI(system: string, user: string): Promise<string> {
+async function callOpenAI(
+  system: string,
+  user: string,
+  temperature = 0.7
+): Promise<string> {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -95,7 +100,7 @@ async function callOpenAI(system: string, user: string): Promise<string> {
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
-      temperature: 0.7,
+      temperature,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
@@ -115,7 +120,11 @@ async function callOpenAI(system: string, user: string): Promise<string> {
   return data.choices?.[0]?.message?.content || "";
 }
 
-async function callGemini(system: string, user: string): Promise<string> {
+async function callGemini(
+  system: string,
+  user: string,
+  temperature = 0.7
+): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
   const res = await fetch(url, {
     method: "POST",
@@ -123,7 +132,7 @@ async function callGemini(system: string, user: string): Promise<string> {
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: `${system}\n\n${user}` }] }],
       generationConfig: {
-        temperature: 0.7,
+        temperature,
         responseMimeType: "application/json",
       },
     }),
@@ -140,29 +149,72 @@ async function callGemini(system: string, user: string): Promise<string> {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
+function pickFrom<T>(items: T[], seed: number, offset = 0): T {
+  return items[(seed + offset) % items.length];
+}
+
 /** Offline structured generator when no API key is configured */
 export function generateOfflineCourseContent(
   input: GenerateCourseInput
 ): CourseContent {
-  const seed = input.regenerate ? "Alt" : "Core";
+  const variation = input.variationSeed ?? (input.regenerate ? Date.now() : 0);
+  const trackNames = [
+    "Core",
+    "Practical",
+    "Applied",
+    "Accelerated",
+    "Project-Based",
+    "Career-Ready",
+  ];
+  const moduleVerbs = [
+    "Master",
+    "Explore",
+    "Apply",
+    "Build",
+    "Practice",
+    "Refine",
+  ];
+  const moduleFocus = [
+    "foundations",
+    "core skills",
+    "real projects",
+    "advanced patterns",
+    "workflow mastery",
+    "capstone build",
+  ];
+  const track = input.regenerate
+    ? pickFrom(trackNames, variation)
+    : trackNames[0];
+
   const modules = Array.from({ length: input.moduleCount }, (_, i) => {
     const n = i + 1;
+    const verb = pickFrom(moduleVerbs, variation, i);
+    const focus =
+      n === 1
+        ? "foundations"
+        : n === input.moduleCount
+          ? "capstone project"
+          : pickFrom(moduleFocus, variation, i + 2);
     return {
-      title: `${seed} Module ${n}: ${input.topic} fundamentals ${n === 1 ? "foundations" : n === input.moduleCount ? "capstone" : `deep dive ${n}`}`,
-      summary: `A ${input.tone.toLowerCase()} module for ${input.audience} covering practical ${input.topic} skills at ${input.level} level.`,
+      title: `${verb} ${input.topic}: ${focus}`,
+      summary: `A ${input.tone.toLowerCase()} module for ${input.audience} focused on ${focus} at ${input.level} level.`,
       lessons: [
-        `Introduction to module ${n}`,
-        `Hands-on practice: ${input.topic}`,
-        `Checkpoint quiz ${n}`,
+        `${verb} key concepts for module ${n}`,
+        `Guided lab: ${input.topic}`,
+        `Review and checkpoint ${n}`,
       ],
     };
   });
 
-  const shortBase = `Learn ${input.topic} with a ${input.tone.toLowerCase()} path designed for ${input.audience}.`;
-  const fullBase = `This Aimers course helps ${input.audience} master ${input.topic} at ${input.level} level. You will progress through ${input.moduleCount} guided modules, build portfolio-ready work, and finish with clear next steps for continued growth.`;
+  const shortBase = input.regenerate
+    ? `A refreshed ${input.tone.toLowerCase()} path on ${input.topic} for ${input.audience}, with new module angles and exercises.`
+    : `Learn ${input.topic} with a ${input.tone.toLowerCase()} path designed for ${input.audience}.`;
+  const fullBase = input.regenerate
+    ? `This regenerated Aimers course gives ${input.audience} a new route through ${input.topic} at ${input.level} level. Expect alternate module sequencing, updated project ideas, and clearer milestones across ${input.moduleCount} guided sections.`
+    : `This Aimers course helps ${input.audience} master ${input.topic} at ${input.level} level. You will progress through ${input.moduleCount} guided modules, build portfolio-ready work, and finish with clear next steps for continued growth.`;
 
   const content: CourseContent = {
-    title: `${input.topic}: ${input.level} ${seed} Track`,
+    title: `${input.topic}: ${input.level} ${track} Track`,
     shortDescription:
       input.length === "short"
         ? shortBase
@@ -184,11 +236,17 @@ export function generateOfflineCourseContent(
       input.tone.toLowerCase().slice(0, 16),
     ],
     modules,
-    learningOutcomes: [
-      `Explain core concepts of ${input.topic}`,
-      `Apply ${input.topic} skills in guided projects`,
-      `Build a portfolio artifact suitable for ${input.audience}`,
-    ],
+    learningOutcomes: input.regenerate
+      ? [
+          `Compare and apply refreshed ${input.topic} concepts in new scenarios`,
+          `Complete alternate guided projects tailored for ${input.audience}`,
+          `Demonstrate stronger ${input.level.toLowerCase()}-level confidence with updated exercises`,
+        ]
+      : [
+          `Explain core concepts of ${input.topic}`,
+          `Apply ${input.topic} skills in guided projects`,
+          `Build a portfolio artifact suitable for ${input.audience}`,
+        ],
   };
 
   return courseContentSchema.parse(content);
@@ -212,21 +270,22 @@ export async function generateCourseContent(input: GenerateCourseInput): Promise
 
   const system = buildSystemPrompt();
   const user = buildUserPrompt(input);
+  const temperature = input.regenerate ? 0.95 : 0.7;
 
   if (env.AI_PROVIDER === "openai" && hasOpenAI) {
-    const text = await callOpenAI(system, user);
+    const text = await callOpenAI(system, user, temperature);
     const parsed = courseContentSchema.parse(extractJson(text));
     return { content: parsed, provider: "openai" };
   }
 
   if ((env.AI_PROVIDER === "gemini" || !hasOpenAI) && hasGemini) {
-    const text = await callGemini(system, user);
+    const text = await callGemini(system, user, temperature);
     const parsed = courseContentSchema.parse(extractJson(text));
     return { content: parsed, provider: "gemini" };
   }
 
   if (hasOpenAI) {
-    const text = await callOpenAI(system, user);
+    const text = await callOpenAI(system, user, temperature);
     const parsed = courseContentSchema.parse(extractJson(text));
     return { content: parsed, provider: "openai" };
   }

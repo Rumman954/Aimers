@@ -23,18 +23,34 @@ export function CourseImage({
   priority,
 }: CourseImageProps) {
   const [current, setCurrent] = useState(src || FALLBACK);
+  const isDataUrl = current.startsWith("data:image/");
 
   return (
-    <Image
-      src={current}
-      alt={alt}
-      fill
-      priority={priority}
-      className={cn("object-cover", className)}
-      sizes={sizes}
-      onError={() => {
-        if (current !== FALLBACK) setCurrent(FALLBACK);
-      }}
-    />
+    <>
+      {isDataUrl ? (
+        // Next/Image can be picky with data-URLs in some configurations.
+        // For uploaded thumbnails we render with a plain <img> instead.
+        <img
+          src={current}
+          alt={alt}
+          className={cn("absolute inset-0 object-cover", className)}
+          onError={() => {
+            if (current !== FALLBACK) setCurrent(FALLBACK);
+          }}
+        />
+      ) : (
+        <Image
+          src={current}
+          alt={alt}
+          fill
+          priority={priority}
+          className={cn("object-cover", className)}
+          sizes={sizes}
+          onError={() => {
+            if (current !== FALLBACK) setCurrent(FALLBACK);
+          }}
+        />
+      )}
+    </>
   );
 }

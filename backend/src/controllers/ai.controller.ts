@@ -30,6 +30,7 @@ const generateSchema = z.object({
   tone: z.string().min(2).max(40).default("clear and motivating"),
   length: z.enum(["short", "medium", "long"]).default("medium"),
   regenerate: z.boolean().optional().default(false),
+  variationSeed: z.coerce.number().int().optional(),
 });
 
 const recommendSchema = z.object({
@@ -62,9 +63,13 @@ export const generateCourse = async (
       provider: result.provider,
       offline: result.provider === "offline",
       message:
-        result.provider === "offline"
-          ? "Generated with Aimers offline template. Add OPENAI_API_KEY or GEMINI_API_KEY for live LLM output."
-          : `Generated with ${result.provider}`,
+        body.regenerate
+          ? result.provider === "offline"
+            ? "Regenerated an alternative version with Aimers offline template. Add OPENAI_API_KEY or GEMINI_API_KEY for live LLM output."
+            : `Regenerated a fresh alternative with ${result.provider}`
+          : result.provider === "offline"
+            ? "Generated with Aimers offline template. Add OPENAI_API_KEY or GEMINI_API_KEY for live LLM output."
+            : `Generated with ${result.provider}`,
       data: result.content,
     });
   } catch (error) {

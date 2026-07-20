@@ -13,7 +13,6 @@ const loggedOutLinks = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/login", label: "Login" },
-  { href: "/register", label: "Register" },
 ];
 
 const loggedInLinks = [

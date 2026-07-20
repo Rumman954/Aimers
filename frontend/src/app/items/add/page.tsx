@@ -50,9 +50,7 @@ function AddItemForm() {
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
   const [level, setLevel] = useState<CourseLevel>("Beginner");
   const [duration, setDuration] = useState("6 weeks");
-  const [thumbnail, setThumbnail] = useState(
-    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
-  );
+  const [thumbnail, setThumbnail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState("");
   const [aiApplied, setAiApplied] = useState(false);
@@ -98,7 +96,7 @@ function AddItemForm() {
     }
     if (!category) next.category = "Choose a category.";
     if (!duration.trim()) next.duration = "Duration is required.";
-    if (!thumbnail.trim()) next.thumbnail = "Image URL is required.";
+    if (!thumbnail.trim()) next.thumbnail = "Thumbnail image is required.";
     return next;
   }
 
@@ -247,15 +245,56 @@ function AddItemForm() {
           placeholder="e.g. 6 weeks"
           required
         />
-        <Field
-          id="course-thumbnail"
-          label="Thumbnail image URL"
-          type="url"
-          value={thumbnail}
-          onChange={setThumbnail}
-          error={fieldErrors.thumbnail}
-          required
-        />
+        <div>
+          <label htmlFor="course-thumbnail" className="block text-sm font-medium">
+            Thumbnail image upload
+          </label>
+          <input
+            id="course-thumbnail"
+            type="file"
+            accept="image/*"
+            required
+            className={cn(fieldClassName, "mt-2 p-0")}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              // Keep uploads small for performance and to avoid huge payloads.
+              if (file.size > 2.5 * 1024 * 1024) {
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  thumbnail: "Please upload an image under 2.5MB.",
+                }));
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result;
+                if (typeof result === "string") {
+                  setThumbnail(result);
+                  setFieldErrors((prev) => ({ ...prev, thumbnail: undefined }));
+                }
+              };
+              reader.readAsDataURL(file);
+            }}
+          />
+          {thumbnail ? (
+            <div className="relative mt-4 aspect-[16/10] w-full overflow-hidden rounded-[var(--aimers-radius)] border border-aimers-border bg-aimers-surface">
+              {/* Preview uploaded thumbnail */}
+              <img
+                src={thumbnail}
+                alt="Thumbnail preview"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-aimers-muted">
+              Choose an image to use as your course thumbnail.
+            </p>
+          )}
+          {fieldErrors.thumbnail ? (
+            <p className="mt-1 text-xs text-red-600">{fieldErrors.thumbnail}</p>
+          ) : null}
+        </div>
 
         <div className="flex flex-wrap gap-3">
           <Button type="submit" size="lg" disabled={loading}>
